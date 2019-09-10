@@ -1,0 +1,3 @@
+/Users/cedrichansen/Programs/csc454/csc454hw01/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/cedrichansen/Programs/csc454/csc454hw01/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/cedrichansen/Programs/csc454/csc454hw01/cmake-build-debug/CMakeFiles/csc454hw01.dir
