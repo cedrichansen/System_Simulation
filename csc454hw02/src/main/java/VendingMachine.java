@@ -1,9 +1,9 @@
 public class VendingMachine {
 
-    static float QUARTER_VALUE = 0.25f;
-    static float DIME_VALUE = 0.10f;
-    static float NICKEL_VALUE = 0.05f;
-    static float COFFEE_PRICE = 1.00f;
+    static int QUARTER_VALUE = 25;
+    static int DIME_VALUE = 10;
+    static int NICKEL_VALUE = 5;
+    static int COFFEE_PRICE = 100;
 
 
     int numberOfNickels;
@@ -26,27 +26,8 @@ public class VendingMachine {
     }
 
 
-    public void insertCoins(Coin[] coins) {
-
-        for (Coin c : coins) {
-            if (c.value == QUARTER_VALUE) {
-                numberOfQuarters++;
-            } else if (c.value == DIME_VALUE) {
-                numberOfDimes++;
-            } else if (c.value == NICKEL_VALUE) {
-                numberOfNickels++;
-            } else {
-                System.out.println("Unknown coin was entered");
-            }
-
-            customerValue += c.value;
-        }
-
-    }
-
-
     public void dispenseCoffe() {
-        customerValue -= 1.00f;
+        customerValue -= COFFEE_PRICE;
         System.out.println("Dispensed coffee! Balance is now: " + customerValue);
     }
 
@@ -58,20 +39,29 @@ public class VendingMachine {
         int numberOfNickelsToDispense = 0;
 
 
-        if (amountToDispense > QUARTER_VALUE) {
+        if (amountToDispense >= QUARTER_VALUE) {
             numberOfQuartersToDispense = (int) (amountToDispense / QUARTER_VALUE);
+            if (numberOfQuartersToDispense > numberOfQuarters) { //we do not have enough quarters left to give quarters, so give out as many as possible
+                numberOfQuartersToDispense = numberOfQuarters;
+            }
             amountToDispense -= (QUARTER_VALUE * numberOfQuartersToDispense);
             amountDispensed += (QUARTER_VALUE * numberOfQuartersToDispense);
         }
 
-        if (amountToDispense > DIME_VALUE) {
+        if (amountToDispense >= DIME_VALUE) {
             numberOfDimesToDispense = (int) (amountToDispense / DIME_VALUE);
+            if (numberOfDimesToDispense > numberOfDimes) {
+                numberOfDimesToDispense = numberOfDimes;
+            }
             amountToDispense -= (DIME_VALUE * numberOfDimesToDispense);
             amountDispensed += (DIME_VALUE * numberOfDimesToDispense);
         }
 
-        if (amountToDispense > NICKEL_VALUE) {
+        if (amountToDispense >= NICKEL_VALUE) {
             numberOfNickelsToDispense = (int) (amountToDispense / NICKEL_VALUE);
+            if (numberOfNickelsToDispense > numberOfNickels) {
+                numberOfNickelsToDispense = numberOfNickels;
+            }
             amountToDispense -= (NICKEL_VALUE * numberOfNickelsToDispense);
             amountDispensed += (NICKEL_VALUE * numberOfNickelsToDispense);
         }
@@ -89,8 +79,8 @@ public class VendingMachine {
         assert (customerValue == 0);
 
         System.out.println("Change has been returned: " + numberOfQuartersToDispense + " Quarters, " +
-                numberOfDimesToDispense + " Dimes, " + numberOfNickels + " Nickels. Total value returned: " +
-                calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense));
+                numberOfDimesToDispense + " Dimes, " + numberOfNickelsToDispense + " Nickels. Total value returned: " +
+                calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense)/100);
 
 
     }
@@ -133,10 +123,13 @@ public class VendingMachine {
             System.out.println("waiting for next tik... ");
             System.out.println(this.toString());
 
-        } else if (command.equals("cancel")) {
-
-        } else if (command.equals("change")){
+        } else if (command.equals("cancel")){
             //TODO ask if cancel means that the change button was pressed?
+            if (customerValue > 0) {
+                getChange();
+            } else {
+                System.out.println("No money has been inserted! No change to be given");
+            }
             printBalance();
 
 
@@ -144,7 +137,7 @@ public class VendingMachine {
             //if all things we typed were valid coins, then process them.
             addCoins(nickelsInserted, dimesInserted, quartersInserted);
             System.out.println("Added: " + nickelsInserted + " nickels, " + dimesInserted + " dimes, " + quartersInserted + " quarters\n" +
-                    "Total added: " + calculateValue(nickelsInserted, dimesInserted, quartersInserted));
+                    "Total added: " + calculateValue(nickelsInserted, dimesInserted, quartersInserted)/100);
             printBalance();
 
         } else {
@@ -166,11 +159,11 @@ public class VendingMachine {
     }
 
     public String toString() {
-        return "Nickels: " + numberOfNickels + " Dimes: " + numberOfDimes + " Quarters: " + numberOfQuarters + "\nBalance: " + customerValue;
+        return "Nickels: " + numberOfNickels + " Dimes: " + numberOfDimes + " Quarters: " + numberOfQuarters + "\nBalance: " + customerValue/100;
     }
 
     public void printBalance(){
-        System.out.println("Balance: " + customerValue);
+        System.out.println("Balance: " + customerValue/100);
     }
 
 
