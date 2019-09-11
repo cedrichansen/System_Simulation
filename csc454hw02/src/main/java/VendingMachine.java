@@ -81,8 +81,6 @@ public class VendingMachine {
         System.out.println("Change has been returned: " + numberOfQuartersToDispense + " Quarters, " +
                 numberOfDimesToDispense + " Dimes, " + numberOfNickelsToDispense + " Nickels. Total value returned: " +
                 calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense)/100);
-
-
     }
 
     private float calculateValue(int nickels, int dimes, int quarters) {
@@ -90,7 +88,6 @@ public class VendingMachine {
         return (NICKEL_VALUE * nickels) + (DIME_VALUE * dimes) + (QUARTER_VALUE * quarters);
 
     }
-
 
     public void startSimulation() {
         //allow people to put in money and press buttons and stuff... Basically the loop that processes the sim
@@ -117,8 +114,6 @@ public class VendingMachine {
         int nickelsInserted = (int)command.chars().filter(ch -> ch == 'n').count();
         int coinsInserted = (quartersInserted + dimesInserted + nickelsInserted);
 
-
-
         if (command.equals("wait")) {
             System.out.println("waiting for next tik... ");
             System.out.println(this.toString());
@@ -143,8 +138,6 @@ public class VendingMachine {
         } else {
             System.out.println("Unknown input.... please type a valid input");
         }
-
-
 
     }
 

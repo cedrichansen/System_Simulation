@@ -46,17 +46,9 @@ public class Main {
                 s.nextLine(); // clear buffer
             }
 
-
-
         }
 
-
         VendingMachine vm = new VendingMachine(nickels,dimes,quarters);
-
-
-        System.out.println(vm.toString());
-
-
         vm.startSimulation();
 
     }
