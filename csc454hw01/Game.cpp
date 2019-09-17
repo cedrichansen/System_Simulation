@@ -657,7 +657,10 @@ public:
     {
         debugPrint("Cleaning up Game\n");
         delete[] rooms;
-        delete[] creatures;
+        for (int i=0; numberOfCreatures; i++) {
+            delete creatures[i];
+        }
+        delete creatures;
     }
 };
 
