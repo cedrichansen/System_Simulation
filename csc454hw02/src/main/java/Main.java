@@ -16,7 +16,6 @@ transition in order not to have to keep stale states around.
 
  */
 
-
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -24,17 +23,18 @@ public class Main {
 
     static Scanner s = new Scanner(System.in);
 
-    public static void main(String [] args) {
+    public static void main(String[] args) throws VendingMachineException {
 
         System.out.println("Welcome to the vending machine simulator! \n");
 
-        int nickels =0, dimes =0, quarters = 0;
+        int nickels = 0, dimes = 0, quarters = 0;
 
         boolean successfulInput = false;
         while (!successfulInput) {
 
-            System.out.println("Please enter the number of nickels, dimes and quarters to start with in the vending machine.\n" +
-                    "Format: \"n d q\" (Separated by spaces)");
+            System.out.println(
+                    "Please enter the number of nickels, dimes and quarters to start with in the vending machine.\n"
+                            + "Format: \"n d q\" (Separated by spaces)");
 
             try {
                 nickels = s.nextInt();
@@ -48,8 +48,14 @@ public class Main {
 
         }
 
-        VendingMachine vm = new VendingMachine(nickels,dimes,quarters);
-        vm.startSimulation();
+        System.out.println(
+                "Available commands are \"n\", for a nickel, \"d\" for a dime, \"q\" for a quarter, \"w\", to wait, and \"c\" to request change. \nInvalid characters will be ignored\nMultiple valid characters may be entered simulataneously, eg. dddnnn for 3 nikels, and 3 dimes\n");
 
+        VendingMachine vm = new VendingMachine(nickels, dimes, quarters);
+        try {
+        vm.startSimulation();
+        } catch (VendingMachineException e) {
+            System.out.println(e);
+        }
     }
 }
