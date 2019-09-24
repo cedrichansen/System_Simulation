@@ -156,7 +156,8 @@ public:
 
         // modify the state based on the input
         char commands[command.length() + 1];
-        strcpy(commands, command.c_str());
+        copy(command.begin(), command.end(), commands);
+        commands[command.size()] = '\0';
         int quartersInserted = 0;
         int dimesInserted = 0;
         int nickelsInserted = 0;
