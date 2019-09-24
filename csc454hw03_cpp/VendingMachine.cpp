@@ -41,7 +41,7 @@ public:
         if (numberOfCoffees > 0)
         {
             customerValue -= numberOfCoffees * COFFEE_PRICE;
-            printf("Dispensed %d coffee(s)! Balance is now: %f\n", numberOfCoffees, (customerValue / 100));
+            printf("Dispensed %d coffee(s)! Balance is now: %.2f\n", numberOfCoffees, (customerValue / 100));
         }
     }
 
@@ -110,7 +110,7 @@ public:
                 // The output function will be printing out values, aka, producing output
                 if (amountDispensed != 0)
                 {
-                    printf("Change has been returned: %d Quarters, %d Dimes, %d Nickels\nTotal Value returned: %f", numberOfQuartersToDispense, numberOfDimesToDispense, numberOfNickelsToDispense, (calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense) / 100));
+                    printf("Change has been returned: %d Quarters, %d Dimes, %d Nickels\nTotal Value returned: %.2f", numberOfQuartersToDispense, numberOfDimesToDispense, numberOfNickelsToDispense, (calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense) / 100));
                 }
                 else
                 {
@@ -199,7 +199,7 @@ public:
         {
             // at least one type of change was inserted
             addCoins(nickelsInserted, dimesInserted, quartersInserted);
-            printf("Added: %d nickels, %d dimes, %d quarters\nTotal Added: %f \n", nickelsInserted, dimesInserted, quartersInserted, (calculateValue(nickelsInserted, dimesInserted, quartersInserted) / 100));
+            printf("Added: %d nickels, %d dimes, %d quarters\nTotal Added: %.2f \n", nickelsInserted, dimesInserted, quartersInserted, (calculateValue(nickelsInserted, dimesInserted, quartersInserted) / 100));
         }
 
         printVMInfo();
@@ -221,6 +221,6 @@ public:
 
     void printVMInfo()
     {
-        printf("---Vending Machine info---\nNickels: %d Dimes: %d Quarters: %d\nBalance: %f\nCurrent Tik: %d\n", numberOfNickels, numberOfDimes, numberOfQuarters, customerValue / 100, tikNumber);
+        printf("---Vending Machine info---\nNickels: %d Dimes: %d Quarters: %d\nBalance: %.2f\nCurrent Tik: %d\n", numberOfNickels, numberOfDimes, numberOfQuarters, customerValue / 100, tikNumber);
     }
 };
