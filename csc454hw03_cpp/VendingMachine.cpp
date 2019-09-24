@@ -5,6 +5,15 @@
 
 using namespace std;
 
+struct VendingMachineException : public exception
+{
+	const char * message () const throw ()
+    {
+    	return "OH NO! Looks like the vending machine does not have the right combination of coins to produce the correct change :(\nPlease contact management (613-898-2930) to refill the coins in the vending machine, AND, to receive a complimentary coffee, on us, free of charge!\nWe again apologize for this inconvenience, and we hope to be able to better service you next time!\n";
+    }
+};
+
+
 class VendingMachine
 {
 
@@ -91,8 +100,12 @@ public:
             if (amountDispensed != customerValue)
             {
                 //we do not have enough coins to dispense correct amount of change
-                printf("EXCEPTION THROW HERE");
-                
+                try {
+                throw VendingMachineException();
+                } catch (VendingMachineException &vme) {
+                    printf("%s", vme.message());
+                    exit (EXIT_FAILURE);
+                }
             }
 
             if (!isForOutput)
