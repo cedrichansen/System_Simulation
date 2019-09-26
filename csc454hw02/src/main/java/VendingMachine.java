@@ -1,10 +1,10 @@
 public class VendingMachine {
 
     // a few helper variables
-    static int QUARTER_VALUE = 25;
-    static int DIME_VALUE = 10;
-    static int NICKEL_VALUE = 5;
-    static int COFFEE_PRICE = 100;
+    final static int QUARTER_VALUE = 25;
+    final static int DIME_VALUE = 10;
+    final static int NICKEL_VALUE = 5;
+    final static int COFFEE_PRICE = 100;
     private int tikNumber = 0;
 
     // 5 variables representing machine state
@@ -21,17 +21,8 @@ public class VendingMachine {
         this.numberOfQuarters = initialQuarters;
     }
 
-    public void dispenseCoffee(boolean output) {
-        int numberOfCoffees = (int) ((customerValue) / COFFEE_PRICE);
-
-        if (numberOfCoffees > 0) {
-            if (!output) {
-                customerValue -= numberOfCoffees * COFFEE_PRICE;
-            } else {
-                System.out.println("Dispensed " + numberOfCoffees + " coffee(s)! Balance is now: " + ((customerValue - (numberOfCoffees*COFFEE_PRICE))/ 100));
-            }
-        }
-
+    public int dispenseCoffee() {
+        return (int) ((customerValue) / COFFEE_PRICE);
     }
 
     /**
@@ -39,7 +30,7 @@ public class VendingMachine {
      * 
      * @throws VendingMachineException
      */
-    public void getChange(boolean output) throws VendingMachineException {
+    public int[] getChange() throws VendingMachineException {
 
         if (changeButtonPressed) {
             float amountToDispense = customerValue;
@@ -77,33 +68,16 @@ public class VendingMachine {
             }
 
             if (amountDispensed != customerValue) {
-                //we do not have enough coins to dispense correct amount of change
+                // we do not have enough coins to dispense correct amount of change
                 throw new VendingMachineException(VendingMachineException.managementMessage);
             }
 
-            if (!output) {
-                // The output function cannot modify the state, so we hold on to the state so that the state transition function can make the state change
-                numberOfNickels -= numberOfNickelsToDispense;
-                numberOfDimes -= numberOfDimesToDispense;
-                numberOfQuarters -= numberOfQuartersToDispense;
+            int[] change = { numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense };
+            return change;
 
-                customerValue -= amountDispensed;
-                changeButtonPressed = false;
-
-            } else {
-                // The output function will be printing out values, aka, producing output
-                if (amountDispensed != 0) {
-                    System.out.println("Change has been returned: " + numberOfQuartersToDispense + " Quarters, "
-                    + numberOfDimesToDispense + " Dimes, " + numberOfNickelsToDispense
-                    + " Nickels. Total value returned: "
-                    + calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense)
-                            / 100);
-                } else {
-                    System.out.println("Change button was pressed, but there is no balance to dispense");
-                }
-                
-            }
-
+        } else {
+            int[] change = { 0, 0, 0 };
+            return change;
         }
 
     }
@@ -154,10 +128,17 @@ public class VendingMachine {
         tikNumber++;
 
         // process output from the current state
-        dispenseCoffee(true);
-        getChange(true);
+        { // lambda
+            printCoffee(dispenseCoffee());
+            int[] change = getChange();
+            printChange(change[0], change[1], change[2]);
+        }
 
-        adjustState();
+        {// delta
+            modifyState(dispenseCoffee());
+            int[] change = getChange();
+            modifyState(change[0], change[1], change[2]);
+        }
 
         // modify the state based on the input
         char[] commands = command.toCharArray();
@@ -197,16 +178,22 @@ public class VendingMachine {
 
     }
 
-    /**
-     * Purpose of this function is to look at the state of the machine, and adjust
-     * it for whatever was outputted. eg, if we have $1.50 in the machine, and the
-     * change button was not pressed, then dispense a coffee... That sort of thing
-     */
-    private void adjustState() throws VendingMachineException {
-        
-        dispenseCoffee(false);
-        getChange(false);
+    // modify state for coffee being dispensed
+    private void modifyState(int numberOfCoffees) {
+        customerValue -= numberOfCoffees * COFFEE_PRICE;
+    }
 
+    private void modifyState(int numberOfNickelsToDispense, int numberOfDimesToDispense,
+            int numberOfQuartersToDispense) {
+        numberOfNickels -= numberOfNickelsToDispense;
+        numberOfDimes -= numberOfDimesToDispense;
+        numberOfQuarters -= numberOfQuartersToDispense;
+
+        int amountDispensed = (NICKEL_VALUE * numberOfNickelsToDispense) + (DIME_VALUE * numberOfDimesToDispense)
+                + (QUARTER_VALUE * numberOfQuartersToDispense);
+
+        customerValue -= amountDispensed;
+        changeButtonPressed = false;
     }
 
     /**
@@ -230,4 +217,26 @@ public class VendingMachine {
                 + "\n";
     }
 
+    public void printChange(int numberOfNickelsToDispense, int numberOfDimesToDispense,
+            int numberOfQuartersToDispense) {
+        if (changeButtonPressed) {
+            if (numberOfDimesToDispense + numberOfNickelsToDispense + numberOfQuartersToDispense == 0) {
+                System.out.println("Change button was pressed, but there is no change to dispense!");
+            } else {
+                System.out.println("Change has been returned: " + numberOfQuartersToDispense + " Quarters, "
+                        + numberOfDimesToDispense + " Dimes, " + numberOfNickelsToDispense
+                        + " Nickels. Total value returned: "
+                        + calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense)
+                                / 100);
+            }
+        }
+
+    }
+
+    public void printCoffee(int numberOfCoffees) {
+        if (numberOfCoffees != 0) {
+            System.out.println("Dispensed " + numberOfCoffees + " coffee(s)! Balance is now: "
+                    + ((customerValue - (numberOfCoffees * COFFEE_PRICE)) / 100));
+        }
+    }
 }
