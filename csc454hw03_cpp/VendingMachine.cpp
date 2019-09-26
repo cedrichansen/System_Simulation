@@ -43,14 +43,17 @@ public:
         tikNumber = 0;
     }
 
-    void dispenseCoffee()
+    void dispenseCoffee(bool output)
     {
         int numberOfCoffees = (int)((customerValue) / COFFEE_PRICE);
 
         if (numberOfCoffees > 0)
         {
-            customerValue -= numberOfCoffees * COFFEE_PRICE;
-            printf("Dispensed %d coffee(s)! Balance is now: %.2f\n", numberOfCoffees, (customerValue / 100));
+            if (!output) {
+                customerValue -= numberOfCoffees * COFFEE_PRICE;
+            } else {
+                printf("Dispensed %d coffee(s)! Balance is now: %.2f\n", numberOfCoffees, (customerValue - (numberOfCoffees * COFFEE_PRICE) / 100));
+            }
         }
     }
 
@@ -162,7 +165,7 @@ public:
         tikNumber++;
 
         // process output from the current state
-        dispenseCoffee();
+        dispenseCoffee(true);
         getChange(true);
 
         adjustState();
@@ -220,6 +223,7 @@ public:
 
     void adjustState()
     {
+        dispenseCoffee(false);
         getChange(false);
     }
 
