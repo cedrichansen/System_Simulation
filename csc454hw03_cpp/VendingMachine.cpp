@@ -7,12 +7,11 @@ using namespace std;
 
 struct VendingMachineException : public exception
 {
-	const char * message () const throw ()
+    const char *message() const throw()
     {
-    	return "OH NO! Looks like the vending machine does not have the right combination of coins to produce the correct change :(\nPlease contact management (613-898-2930) to refill the coins in the vending machine, AND, to receive a complimentary coffee, on us, free of charge!\nWe again apologize for this inconvenience, and we hope to be able to better service you next time!\n";
+        return "OH NO! Looks like the vending machine does not have the right combination of coins to produce the correct change :(\nPlease contact management (613-898-2930) to refill the coins in the vending machine, AND, to receive a complimentary coffee, on us, free of charge!\nWe again apologize for this inconvenience, and we hope to be able to better service you next time!\n";
     }
 };
-
 
 class VendingMachine
 {
@@ -43,22 +42,15 @@ public:
         tikNumber = 0;
     }
 
-    void dispenseCoffee(bool output)
+    int dispenseCoffee()
     {
-        int numberOfCoffees = (int)((customerValue) / COFFEE_PRICE);
-
-        if (numberOfCoffees > 0)
-        {
-            if (!output) {
-                customerValue -= numberOfCoffees * COFFEE_PRICE;
-            } else {
-                printf("Dispensed %d coffee(s)! Balance is now: %.2f\n", numberOfCoffees, (customerValue - (numberOfCoffees * COFFEE_PRICE) / 100));
-            }
-        }
+        return (int)((customerValue) / COFFEE_PRICE);
     }
 
-    void getChange(bool isForOutput)
+    int *getChange()
     {
+        int * change = new int[3];
+
         if (changeButtonPressed)
         {
             float amountToDispense = customerValue;
@@ -71,7 +63,8 @@ public:
             {
                 numberOfQuartersToDispense = (int)(amountToDispense / QUARTER_VALUE);
                 if (numberOfQuartersToDispense > numberOfQuarters)
-                { 
+                { // we do not have enough quarters left to give
+                    // quarters, so give out as many as possible
                     numberOfQuartersToDispense = numberOfQuarters;
                 }
                 amountToDispense -= (QUARTER_VALUE * numberOfQuartersToDispense);
@@ -102,38 +95,31 @@ public:
 
             if (amountDispensed != customerValue)
             {
-                //we do not have enough coins to dispense correct amount of change
-                try {
-                throw VendingMachineException();
-                } catch (VendingMachineException &vme) {
+                // we do not have enough coins to dispense correct amount of change
+                try
+                {
+                    throw VendingMachineException();
+                }
+                catch (VendingMachineException &vme)
+                {
                     printf("%s", vme.message());
-                    exit (EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                 }
             }
 
-            if (!isForOutput)
-            {
-                // The output function cannot modify the state, so we hold on to the state so that the state transition function can make the state change
-                numberOfNickels -= numberOfNickelsToDispense;
-                numberOfDimes -= numberOfDimesToDispense;
-                numberOfQuarters -= numberOfQuartersToDispense;
-
-                customerValue -= amountDispensed;
-                changeButtonPressed = false;
-            }
-            else
-            {
-                // The output function will be printing out values, aka, producing output
-                if (amountDispensed != 0)
-                {
-                    printf("Change has been returned: %d Quarters, %d Dimes, %d Nickels\nTotal Value returned: %.2f", numberOfQuartersToDispense, numberOfDimesToDispense, numberOfNickelsToDispense, (calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense) / 100));
-                }
-                else
-                {
-                    printf("Change button was pressed, but there is no balance to dispense\n");
-                }
-            }
+            change[0] = numberOfNickelsToDispense;
+            change[1] = numberOfDimesToDispense;
+            change[2] = numberOfQuartersToDispense;
         }
+        else
+        { //no change will be dispensed
+            change[0] = 0;
+            change[1] = 0;
+            change[2] = 0;
+        }
+        
+        return change;
+
     }
 
     float calculateValue(int nickels, int dimes, int quarters)
@@ -165,10 +151,21 @@ public:
         tikNumber++;
 
         // process output from the current state
-        dispenseCoffee(true);
-        getChange(true);
+        { // lambda
+            printCoffee(dispenseCoffee());
+            int *change = getChange();
+            printChange(change[0], change[1], change[2]);
+            delete change;
+            change = NULL;
+        }
 
-        adjustState();
+        { // delta
+            modifyState(dispenseCoffee());
+            int *change = getChange();
+            modifyState(change[0], change[1], change[2]);
+            delete change;
+            change = NULL;
+        }
 
         // modify the state based on the input
         char commands[command.length() + 1];
@@ -207,7 +204,7 @@ public:
             }
             else if (c != 0)
             {
-                printf("%s is an invalid token and will be ignored\n", string(1,c).c_str());
+                printf("%s is an invalid token and will be ignored\n", string(1, c).c_str());
             }
         }
 
@@ -219,12 +216,6 @@ public:
         }
 
         printVMInfo();
-    }
-
-    void adjustState()
-    {
-        dispenseCoffee(false);
-        getChange(false);
     }
 
     void addCoins(int nickels, int dimes, int quarters)
@@ -239,5 +230,47 @@ public:
     void printVMInfo()
     {
         printf("---Vending Machine info---\nNickels: %d Dimes: %d Quarters: %d\nBalance: %.2f\nCurrent Tik: %d\n", numberOfNickels, numberOfDimes, numberOfQuarters, customerValue / 100, tikNumber);
+    }
+
+    void modifyState(int numberOfCoffees)
+    {
+        customerValue -= numberOfCoffees * COFFEE_PRICE;
+    }
+
+    void modifyState(int numberOfNickelsToDispense, int numberOfDimesToDispense,
+                     int numberOfQuartersToDispense)
+    {
+        numberOfNickels -= numberOfNickelsToDispense;
+        numberOfDimes -= numberOfDimesToDispense;
+        numberOfQuarters -= numberOfQuartersToDispense;
+
+        int amountDispensed = (NICKEL_VALUE * numberOfNickelsToDispense) + (DIME_VALUE * numberOfDimesToDispense) + (QUARTER_VALUE * numberOfQuartersToDispense);
+
+        customerValue -= amountDispensed;
+        changeButtonPressed = false;
+    }
+
+    void printChange(int numberOfNickelsToDispense, int numberOfDimesToDispense,
+                     int numberOfQuartersToDispense)
+    {
+        if (changeButtonPressed)
+        {
+            if (numberOfDimesToDispense + numberOfNickelsToDispense + numberOfQuartersToDispense == 0)
+            {
+                printf("Change button was pressed, but there is no change to dispense!\n");
+            }
+            else
+            {
+                printf("Change has been returned: %d Quarters, %d Dimes, %d Nickels. Total value returned %.2f\n", numberOfQuartersToDispense, numberOfDimesToDispense, numberOfNickelsToDispense, (calculateValue(numberOfNickelsToDispense, numberOfDimesToDispense, numberOfQuartersToDispense) / 100));
+            }
+        }
+    }
+
+    void printCoffee(int numberOfCoffees)
+    {
+        if (numberOfCoffees != 0)
+        {
+            printf("Dispensed %d coffee(s)! Balance is now: %.2f\n", numberOfCoffees, ((customerValue - (numberOfCoffees * COFFEE_PRICE)) / 100));
+        }
     }
 };
