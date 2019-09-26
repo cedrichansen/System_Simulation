@@ -21,12 +21,15 @@ public class VendingMachine {
         this.numberOfQuarters = initialQuarters;
     }
 
-    public void dispenseCoffee() {
+    public void dispenseCoffee(boolean output) {
         int numberOfCoffees = (int) ((customerValue) / COFFEE_PRICE);
 
         if (numberOfCoffees > 0) {
-            customerValue -= numberOfCoffees * COFFEE_PRICE;
-            System.out.println("Dispensed " + numberOfCoffees + " coffee(s)! Balance is now: " + customerValue / 100);
+            if (!output) {
+                customerValue -= numberOfCoffees * COFFEE_PRICE;
+            } else {
+                System.out.println("Dispensed " + numberOfCoffees + " coffee(s)! Balance is now: " + ((customerValue - (numberOfCoffees*COFFEE_PRICE))/ 100));
+            }
         }
 
     }
@@ -151,7 +154,7 @@ public class VendingMachine {
         tikNumber++;
 
         // process output from the current state
-        dispenseCoffee();
+        dispenseCoffee(true);
         getChange(true);
 
         adjustState();
@@ -200,7 +203,8 @@ public class VendingMachine {
      * change button was not pressed, then dispense a coffee... That sort of thing
      */
     private void adjustState() throws VendingMachineException {
-
+        
+        dispenseCoffee(false);
         getChange(false);
 
     }
