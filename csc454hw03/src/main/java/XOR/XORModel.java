@@ -4,12 +4,8 @@ import Base.*;
 
 public class XORModel extends Model {
 
-    int stateBit;
-
     public XORModel(XORState initial) {
         super(initial);
-        // TODO Auto-generated constructor stub
-        stateBit = initial.stateVariables[0];
     }
 
     public int tick(Input in) {
@@ -19,7 +15,7 @@ public class XORModel extends Model {
     }
 
     public int lambda(State currentState) {
-        return currentState.stateVariables[0];
+        return currentState.stateVariables[0]; //corresponds to the statebit here
     }
 
     public State delta(State currentState, Input inputSet) {
@@ -28,8 +24,5 @@ public class XORModel extends Model {
         XORState s = new XORState(stateVal);
         return s;
     }
-
-
-
 
 }
