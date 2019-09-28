@@ -2,6 +2,9 @@ import Network.*;
 import XOR.*;
 
 import java.util.Scanner;
+import java.util.regex.Pattern;
+
+import javax.sound.sampled.SourceDataLine;
 
 import Base.Input;
 import Memory.*;
@@ -12,8 +15,13 @@ public class Main {
     static XORModel xor2;
     static MemoryModel mm;
     static Network network;
-
+    static boolean verboseMode;
     public static void main(String[] args) {
+        if (args.length != 0) {
+            if (args[0].equals("-v")) {
+                verboseMode = true;
+            }
+        }
 
         initializeFields();
 
@@ -23,12 +31,16 @@ public class Main {
 
         while (!command.equals("exit") && !command.equals("quit")) {
 
-            int[] input = convertToIntArray(command.split(" "));
-            if (input.length == 2) {
-                Input netIn = new NetworkInput(input);
-                System.out.println(propagateTick(netIn));
-            } else {
-                System.out.println("Input must be only 2 values, 0 or 1, with a space in between");
+            try {
+                int[] input = convertToIntArray(command.split(" "));
+                if (input.length == 2) {
+                    Input netIn = new NetworkInput(input);
+                    System.out.println(propagateTick(netIn));
+                } else {
+                    System.out.println("Input must be only 2 values, 0 or 1, with a space in between");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
             }
             
             System.out.println("Type \"0/1 0/1\"");
@@ -65,12 +77,32 @@ public class Main {
         mm = new MemoryModel(mmInitialState);
     }
 
-    private static int[] convertToIntArray(String[] strs) {
+    private static int[] convertToIntArray(String[] strs) throws NumberFormatException {
         int[] ints = new int[strs.length];
         for (int i = 0; i < strs.length; i++) {
-            ints[i] = Integer.parseInt(strs[i]);
+            if (Pattern.matches("[a-zA-Z]+", strs[i])) {
+                throw new NumberFormatException("Cannot enter non numeric values");
+            } else {
+                ints[i] = Integer.parseInt(strs[i]);
+            }
         }
         return ints;
     }
 
 }
+
+/**
+ * 
+ * MemoryModel testing
+ * 
+        // int [] zero = {0};
+        // int [] one = {1};
+        // MemoryInput oneIn = new MemoryInput(one);
+        // MemoryInput zeroIn = new MemoryInput(zero);
+
+        // System.out.println(mm.tick(oneIn));
+        // System.out.println(mm.tick(oneIn));
+        // System.out.println(mm.tick(zeroIn));
+        // System.out.println(mm.tick(oneIn));
+        // System.out.println(mm.tick(zeroIn));
+ */
