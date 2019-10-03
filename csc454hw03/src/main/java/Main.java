@@ -15,11 +15,10 @@ public class Main {
     static XORModel xor2;
     static MemoryModel mm;
     static Network network;
-    static boolean verboseMode;
     public static void main(String[] args) {
         if (args.length != 0) {
             if (args[0].equals("-v")) {
-                verboseMode = true;
+                Base.Model.verbose = true;
             }
         }
 
@@ -49,15 +48,25 @@ public class Main {
 
     }
 
+    /**
+     * This function propagates the input throughout the network
+     */
     private static int propagateTick(Input netIn) {
-        int xor1Out = xor1.tick(netIn);
+
+        // int xor1Out = xor1.tick(netIn);
+        // int xor2Out = xor2.lambda(xor2.state);
+        // int [] memInInts = {xor2Out};
+        // Input memIn = new MemoryInput(memInInts);
+        // int memOut = mm.tick(memIn);
+        // int [] xor2inInts = {xor1Out, memOut};
+        // Input xor2In = new XORInput(xor2inInts);
+        // xor2Out = xor2.tick(xor2In);
+
+        int xor1Out = xor1.lambda(xor1.state);
+        int memOut = mm.lambda(mm.state);
         int xor2Out = xor2.lambda(xor2.state);
-        int [] memInInts = {xor2Out};
-        Input memIn = new MemoryInput(memInInts);
-        int memOut = mm.tick(memIn);
-        int [] xor2inInts = {xor1Out, memOut};
-        Input xor2In = new XORInput(xor2inInts);
-        xor2Out = xor2.tick(xor2In);
+
+        
 
         return xor2Out;
     }
