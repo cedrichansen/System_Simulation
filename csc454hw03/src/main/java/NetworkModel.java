@@ -1,27 +1,23 @@
-package Network;
 
-import java.util.ArrayList;
 
-import Base.*;
+public class NetworkModel extends Model {
 
-public class Network extends Model {
-
-    public Network(NetworkState initial) {
+    public NetworkModel(int [] initial) {
         super(initial);
     }
 
 
-    public int tick(Input input) {
+    public int tick(int [] input) {
         // Chain inputs and outputs togetther here, and produce output
         return tickNumber++;
     }
 
-    public int lambda(State currentState) {
+    public int lambda() {
         // TODO Auto-generated method stub
         return 0;
     }
 
-    public State delta(State currentState, Input inputSet) {
+    public int [] delta(int [] inputSet) {
         // TODO Auto-generated method stub
         return null;
     }

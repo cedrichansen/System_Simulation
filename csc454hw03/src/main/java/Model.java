@@ -1,18 +1,18 @@
-package Base;
+
 
 public abstract class Model {
     public static boolean verbose;
-	public State state;
+	public int [] state;
 
-    public Model(State initial) {
+    public Model(int [] initial) {
         this.state = initial;
     }
 
     public int tickNumber = 0;
 
-    public abstract int tick(Input in);
-    public abstract int lambda(State currentState);
-    public abstract State delta(State currentState, Input inputSet);
+    public abstract int tick(int [] in);
+    public abstract int lambda();
+    public abstract int [] delta(int [] inputSet);
     
     public void debugPrint(String message) {
         if (verbose) {

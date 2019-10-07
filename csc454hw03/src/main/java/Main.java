@@ -1,24 +1,20 @@
-import Network.*;
-import XOR.*;
+
 
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import javax.sound.sampled.SourceDataLine;
 
-import Base.Input;
-import Memory.*;
-
 public class Main {
 
     static XORModel xor1;
     static XORModel xor2;
     static MemoryModel mm;
-    static Network network;
+    static NetworkModel network;
     public static void main(String[] args) {
         if (args.length != 0) {
             if (args[0].equals("-v")) {
-                Base.Model.verbose = true;
+                Model.verbose = true;
             }
         }
 
@@ -33,65 +29,67 @@ public class Main {
             try {
                 int[] input = convertToIntArray(command.split(" "));
                 if (input.length == 2) {
-                    Input netIn = new NetworkInput(input);
-                    System.out.println(propagateTick(netIn));
+                    System.out.println(propagateTick(input));
                 } else {
                     System.out.println("Input must be only 2 values, 0 or 1, with a space in between");
                 }
             } catch (NumberFormatException e) {
                 System.out.println(e.getMessage());
+            } catch (InvalidInputException e){
+                System.out.println(e.getMessage()); 
             }
             
             System.out.println("Type \"0/1 0/1\"");
             command = sc.nextLine();
         }
 
+        sc.close();
+
     }
 
     /**
      * This function propagates the input throughout the network
      */
-    private static int propagateTick(Input netIn) {
+    private static int propagateTick(int [] netIn) {
 
-        // int xor1Out = xor1.tick(netIn);
-        // int xor2Out = xor2.lambda(xor2.state);
-        // int [] memInInts = {xor2Out};
-        // Input memIn = new MemoryInput(memInInts);
-        // int memOut = mm.tick(memIn);
-        // int [] xor2inInts = {xor1Out, memOut};
-        // Input xor2In = new XORInput(xor2inInts);
-        // xor2Out = xor2.tick(xor2In);
-
-        int xor1Out = xor1.lambda(xor1.state);
-        int memOut = mm.lambda(mm.state);
-        int xor2Out = xor2.lambda(xor2.state);
-
+        /** Lambda's */  
+        int xor1Out = xor1.lambda();
+        int memOut = mm.lambda();
+        int xor2Out = xor2.lambda();
         
 
+        /** Delta's */
+        xor1.state = xor1.delta(netIn);
+        int [] mmIn = {xor2Out};
+        mm.state = mm.delta(mmIn);
+
+        int [] xor2In = {memOut, xor1Out};
+        xor2.state = xor2.delta(xor2In);
+
+        //return xor2 (the network output)
         return xor2Out;
     }
 
     private static void initializeFields() {
         int[] in = { 0 };
-        NetworkState initialState = new NetworkState(in);
-        network = new Network(initialState);
+        network = new NetworkModel(in);
 
-        /** Initialise the atomic models */
-        XORState xorInitialState = new XORState(in);
-        xor1 = new XORModel(xorInitialState);
-        xor2 = new XORModel(xorInitialState);
+        xor1 = new XORModel(in);
+        xor2 = new XORModel(in);
 
         int[] mmInitial = { 0, 0 };
-        MemoryState mmInitialState = new MemoryState(mmInitial);
-        mm = new MemoryModel(mmInitialState);
+        mm = new MemoryModel(mmInitial);
     }
 
-    private static int[] convertToIntArray(String[] strs) throws NumberFormatException {
+    private static int[] convertToIntArray(String[] strs) throws NumberFormatException, InvalidInputException {
         int[] ints = new int[strs.length];
         for (int i = 0; i < strs.length; i++) {
             if (Pattern.matches("[a-zA-Z]+", strs[i])) {
                 throw new NumberFormatException("Cannot enter non numeric values");
             } else {
+                if (!strs[i].equals("1") && !strs[i].equals("0")) {
+                    throw new InvalidInputException("Can only enter 0, or 1");
+                }
                 ints[i] = Integer.parseInt(strs[i]);
             }
         }
