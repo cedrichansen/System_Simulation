@@ -52,8 +52,8 @@ public:
         int * change = new int[3];
 
         if (changeButtonPressed)
-        {
-            float amountToDispense = customerValue;
+        {   
+            float amountToDispense = customerValue - (dispenseCoffee()*COFFEE_PRICE);
             float amountDispensed = 0;
             int numberOfQuartersToDispense = 0;
             int numberOfDimesToDispense = 0;
@@ -93,8 +93,9 @@ public:
                 amountDispensed += (NICKEL_VALUE * numberOfNickelsToDispense);
             }
 
-            if (amountDispensed != customerValue)
+            if (amountDispensed != customerValue - (dispenseCoffee()*COFFEE_PRICE))
             {
+                printf("amount Dispensed %f, customer value%f", amountDispensed, customerValue - (dispenseCoffee()*COFFEE_PRICE));
                 // we do not have enough coins to dispense correct amount of change
                 try
                 {
