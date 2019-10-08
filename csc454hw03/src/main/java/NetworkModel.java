@@ -7,9 +7,31 @@ public class NetworkModel extends Model {
     }
 
 
-    public int tick(int [] input) {
-        // Chain inputs and outputs togetther here, and produce output
-        return tickNumber++;
+    public int tick(int [] netIn) {
+        //index 0 is xor1 model
+        //index 1 is mm model
+        //index 2 is xor2 model
+
+        /** Lambda's */  
+        int xor1Out = children.get(0).lambda();
+        int memOut = children.get(1).lambda();
+        int xor2Out = children.get(2).lambda();
+        
+
+        /** Delta's */
+        children.get(0).state = children.get(0).delta(netIn);
+        int [] mmIn = {xor2Out};
+        children.get(1).state = children.get(1).delta(mmIn);
+
+        int [] xor2In = {memOut, xor1Out};
+        children.get(2).state = children.get(2).delta(xor2In);
+
+        return xor2Out;
+    }
+
+
+    public void addModel(Model m) {
+        this.children.add(m);
     }
 
     public int lambda() {

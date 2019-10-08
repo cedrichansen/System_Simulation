@@ -52,25 +52,11 @@ public class Main {
      */
     private static int propagateTick(int [] netIn) {
 
-        /** Lambda's */  
-        int xor1Out = xor1.lambda();
-        int memOut = mm.lambda();
-        int xor2Out = xor2.lambda();
-        
-
-        /** Delta's */
-        xor1.state = xor1.delta(netIn);
-        int [] mmIn = {xor2Out};
-        mm.state = mm.delta(mmIn);
-
-        int [] xor2In = {memOut, xor1Out};
-        xor2.state = xor2.delta(xor2In);
-
-        //return xor2 (the network output)
-        return xor2Out;
+       return network.tick(netIn);
     }
 
     private static void initializeFields() {
+        
         int[] in = { 0 };
         network = new NetworkModel(in);
 
@@ -79,6 +65,10 @@ public class Main {
 
         int[] mmInitial = { 0, 0 };
         mm = new MemoryModel(mmInitial);
+
+        network.addModel(xor1);
+        network.addModel(mm);
+        network.addModel(xor2);
     }
 
     private static int[] convertToIntArray(String[] strs) throws NumberFormatException, InvalidInputException {
