@@ -14,6 +14,7 @@ public class Main {
     public static void main(String[] args) {
         if (args.length != 0) {
             if (args[0].equals("-v")) {
+                System.out.println("Verbose mode has been enabled");
                 Model.verbose = true;
             }
         }
@@ -29,7 +30,11 @@ public class Main {
             try {
                 int[] input = convertToIntArray(command.split(" "));
                 if (input.length == 2) {
-                    System.out.println(propagateTick(input));
+                    if (Model.verbose) {
+                        System.out.println("Network output: " + propagateTick(input));
+                    } else {
+                        System.out.println(propagateTick(input));
+                    }
                 } else {
                     System.out.println("Input must be only 2 values, 0 or 1, with a space in between");
                 }
@@ -39,7 +44,7 @@ public class Main {
                 System.out.println(e.getMessage()); 
             }
             
-            System.out.println("Type \"0/1 0/1\"");
+            System.out.println("\nType \"0/1 0/1\"");
             command = sc.nextLine();
         }
 
@@ -52,7 +57,8 @@ public class Main {
      */
     private static int propagateTick(int [] netIn) {
 
-       return network.tick(netIn);
+       network.tick(netIn);
+       return network.output;
     }
 
     private static void initializeFields() {
@@ -66,9 +72,9 @@ public class Main {
         int[] mmInitial = { 0, 0 };
         mm = new MemoryModel(mmInitial);
 
-        network.addModel(xor1);
-        network.addModel(mm);
-        network.addModel(xor2);
+        network.addModel("xor1", xor1);
+        network.addModel("mm", mm);
+        network.addModel("xor2", xor2);
     }
 
     private static int[] convertToIntArray(String[] strs) throws NumberFormatException, InvalidInputException {

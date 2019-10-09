@@ -1,49 +1,80 @@
-
+import java.util.HashMap;
 
 public class NetworkModel extends Model {
 
-    public NetworkModel(int [] initial) {
+    HashMap<String, Model> children;
+
+    int output;
+
+    public NetworkModel(int[] initial) {
         super(initial);
+        children = new HashMap<String, Model>();
     }
 
+    public void tick(int[] netIn) {
 
-    public int tick(int [] netIn) {
-        //index 0 is xor1 model
-        //index 1 is mm model
-        //index 2 is xor2 model
+        /** Lambda's */
+        lambda();
 
-        /** Lambda's */  
-        int xor1Out = children.get(0).lambda();
-        int memOut = children.get(1).lambda();
-        int xor2Out = children.get(2).lambda();
-        
+        networkInputLink(netIn, children.get("xor1"));
+        dualInputLink(children.get("xor1"), children.get("mm"), children.get("xor2"));
+        simpleLink(children.get("xor2"), children.get("mm"));
+        networkOutputLink(children.get("xor2"));
 
         /** Delta's */
-        children.get(0).state = children.get(0).delta(netIn);
-        int [] mmIn = {xor2Out};
-        children.get(1).state = children.get(1).delta(mmIn);
-
-        int [] xor2In = {memOut, xor1Out};
-        children.get(2).state = children.get(2).delta(xor2In);
-
-        return xor2Out;
-    }
-
-
-    public void addModel(Model m) {
-        this.children.add(m);
+        delta(netIn);
     }
 
     public int lambda() {
-        // TODO Auto-generated method stub
+        for (String model : children.keySet()) {
+            Model currentModel = children.get(model);
+            debugPrint("Lambda from "+ model + ": " + currentModel.lambda());
+        }
         return 0;
     }
 
-    public int [] delta(int [] inputSet) {
-        // TODO Auto-generated method stub
+    public int[] delta(int[] inputSet) {
+        for (String model : children.keySet()) {
+            Model currentModel = children.get(model);
+            currentModel.state = currentModel.delta(currentModel.incomingInput);
+            if (verbose) {
+                String state = "";
+                for (int i = 0; i < currentModel.state.length; i++) {
+                    state += currentModel.state[i] + " ";
+                }
+                state = state.substring(0, state.length() - 1);
+                System.out.println("New state for " + model + ": {" + state + "}");
+            }
+        }
+
         return null;
     }
 
-    
+    public void addModel(String modelName, Model m) {
+        this.children.put(modelName, m);
+    }
+
+    public void networkInputLink(int [] input, Model receivingModel) {
+        receivingModel.incomingInput = input;
+    }
+
+    public void networkOutputLink(Model outputtingModel) {
+        output = outputtingModel.lambda();
+    }
+
+    public void simpleLink(Model sourceModel, Model destinationModel) {
+        int sourceOut = sourceModel.lambda();
+        int[] destinationModelInput = { sourceOut};
+        destinationModel.incomingInput = destinationModelInput;
+    }
+
+    public void dualInputLink(Model sourceModel1, Model sourceModel2, Model destinationModel) {
+        int model1Out = sourceModel1.lambda();
+        int model2Out = sourceModel2.lambda();
+
+        int[] destinationModelInput = { model1Out, model2Out };
+
+        destinationModel.incomingInput = destinationModelInput;
+    }
 
 }

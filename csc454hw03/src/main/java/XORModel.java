@@ -6,13 +6,13 @@ public class XORModel extends Model {
         super(initial);
     }
 
-    public int tick(int [] in) {
+    public void tick(int [] in) {
         int out = lambda();
         this.state = delta(in);
-        return out;
     }
 
     public int lambda() {
+        //debugPrint(this.state[0] + "");
         return this.state[0]; //corresponds to the statebit here
     }
 

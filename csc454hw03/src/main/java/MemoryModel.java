@@ -9,13 +9,13 @@ public class MemoryModel extends Model {
         super(initial);
     }
 
-    public int tick(int [] input) {
+    public void tick(int [] input) {
         int out = lambda();
         this.state = delta(input);
-        return out;
     }
 
     public int lambda() {
+        //debugPrint(this.state[0] + "");
         return this.state[0];
     }
 
