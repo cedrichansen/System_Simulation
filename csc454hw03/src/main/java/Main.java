@@ -7,15 +7,12 @@ import java.io.File;
 
 public class Main {
 
-    static XORModel xor1;
-    static XORModel xor2;
-    static MemoryModel mm;
     static NetworkModel network;
     public static void main(String[] args) {
 
         parseArgs(args);
 
-        initializeFields();
+        initializeNetworks();
 
         getUserInput();
     }
@@ -29,7 +26,7 @@ public class Main {
        return network.outPort.currentValue;
     }
 
-    private static void initializeFields() {
+    private static void initializeNetworks() {
         
         int[] in = {0};
 
