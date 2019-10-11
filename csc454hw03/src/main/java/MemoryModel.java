@@ -5,20 +5,20 @@
  */
 public class MemoryModel extends Model {
 
-    public MemoryModel(int [] initial) {
+    public MemoryModel(int [] initial, Port in, Port out) {
         super(initial);
+        this.outPort = out;
+        this.numberOfInputs = 1;
+        this.inPorts = new Port [numberOfInputs];
+        this.inPorts[0] = in;
     }
 
-    public void tick(int [] input) {
-        int out = lambda();
-        this.state = delta(input);
-    }
-
+    @Override
     public int lambda() {
-        //debugPrint(this.state[0] + "");
         return this.state[0];
     }
 
+    @Override
     public int [] delta(int [] inputSet) {
         int x1 = this.state[1];
         int x2 = inputSet[0];
