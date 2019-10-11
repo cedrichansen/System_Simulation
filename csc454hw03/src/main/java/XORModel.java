@@ -2,17 +2,16 @@
 
 public class XORModel extends Model {
 
-    public XORModel(int [] initial) {
+    public XORModel(int [] initial, Port input1, Port input2, Port output) {
         super(initial);
-    }
-
-    public void tick(int [] in) {
-        int out = lambda();
-        this.state = delta(in);
+        this.outPort = output;
+        this.numberOfInputs = 2;
+        this.inPorts = new Port [numberOfInputs];
+        this.inPorts[0] = input1;
+        this.inPorts[1] = input2;
     }
 
     public int lambda() {
-        //debugPrint(this.state[0] + "");
         return this.state[0]; //corresponds to the statebit here
     }
 

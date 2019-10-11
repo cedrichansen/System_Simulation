@@ -1,14 +1,20 @@
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class NetworkModel extends Model {
 
     HashMap<String, Model> children;
+    ArrayList<Pipe> pipes;
 
-    int output;
-
-    public NetworkModel(int[] initial) {
+    public NetworkModel(int[] initial, Port in1, Port in2, Port out) {
         super(initial);
         children = new HashMap<String, Model>();
+        pipes = new ArrayList<Pipe>();
+        this.numberOfInputs = 2;
+        this.inPorts = new Port [numberOfInputs];
+        this.inPorts[0] = in1;
+        this.inPorts[1] = in2;
+        this.outPort = out;
     }
 
     public void tick(int[] netIn) {
@@ -16,11 +22,13 @@ public class NetworkModel extends Model {
         /** Lambda's */
         lambda();
 
-        networkInputLink(netIn, children.get("xor1"));
-        dualInputLink(children.get("xor1"), children.get("mm"), children.get("xor2"));
-        simpleLink(children.get("xor2"), children.get("mm"));
-        networkOutputLink(children.get("xor2"));
+        for (int i =0; i<netIn.length; i++) {
+            this.inPorts[i].currentValue = netIn[i];
+        }
 
+        /** Pass all pipe values around */
+        executePipes();
+        
         /** Delta's */
         delta(netIn);
     }
@@ -28,6 +36,7 @@ public class NetworkModel extends Model {
     public int lambda() {
         for (String model : children.keySet()) {
             Model currentModel = children.get(model);
+            currentModel.outPort.currentValue = currentModel.lambda();
             debugPrint("Lambda from "+ model + ": " + currentModel.lambda());
         }
         return 0;
@@ -36,7 +45,8 @@ public class NetworkModel extends Model {
     public int[] delta(int[] inputSet) {
         for (String model : children.keySet()) {
             Model currentModel = children.get(model);
-            currentModel.state = currentModel.delta(currentModel.incomingInput);
+            int [] inputs = currentModel.convertInPortsToIntArr();
+            currentModel.state = currentModel.delta(inputs);
             if (verbose) {
                 String state = "";
                 for (int i = 0; i < currentModel.state.length; i++) {
@@ -50,31 +60,18 @@ public class NetworkModel extends Model {
         return null;
     }
 
+    public void executePipes(){
+        for (Pipe p: pipes) {
+            p.passValue();
+        }
+    }
+
     public void addModel(String modelName, Model m) {
         this.children.put(modelName, m);
     }
 
-    public void networkInputLink(int [] input, Model receivingModel) {
-        receivingModel.incomingInput = input;
-    }
-
-    public void networkOutputLink(Model outputtingModel) {
-        output = outputtingModel.lambda();
-    }
-
-    public void simpleLink(Model sourceModel, Model destinationModel) {
-        int sourceOut = sourceModel.lambda();
-        int[] destinationModelInput = { sourceOut};
-        destinationModel.incomingInput = destinationModelInput;
-    }
-
-    public void dualInputLink(Model sourceModel1, Model sourceModel2, Model destinationModel) {
-        int model1Out = sourceModel1.lambda();
-        int model2Out = sourceModel2.lambda();
-
-        int[] destinationModelInput = { model1Out, model2Out };
-
-        destinationModel.incomingInput = destinationModelInput;
+    public void addPipe(Pipe p) {
+        pipes.add(p);
     }
 
 }
