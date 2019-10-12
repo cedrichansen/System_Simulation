@@ -45,7 +45,7 @@ public class Main {
         Port mmOut = new Port();
         MemoryModel mm = new MemoryModel(mmInitial, mmIn, mmOut);
 
-        network = new NetworkModel(in, xor1_In1, xor1_In2, xor2_out); 
+        network = new NetworkModel(in, xor1, xor2); 
 
         network.addPipe(new Pipe(xor1_out, xor2_In1));
         network.addPipe(new Pipe(mmOut, xor2_In2));

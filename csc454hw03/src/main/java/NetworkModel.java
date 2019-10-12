@@ -6,15 +6,16 @@ public class NetworkModel extends Model {
     HashMap<String, Model> children;
     ArrayList<Pipe> pipes;
 
-    public NetworkModel(int[] initial, Port in1, Port in2, Port out) {
+    public NetworkModel(int[] initial, Model inputModel, Model outputModel) {
         super(initial);
         children = new HashMap<String, Model>();
         pipes = new ArrayList<Pipe>();
-        this.numberOfInputs = 2;
+        this.numberOfInputs = inputModel.numberOfInputs;
         this.inPorts = new Port [numberOfInputs];
-        this.inPorts[0] = in1;
-        this.inPorts[1] = in2;
-        this.outPort = out;
+        for (int i =0; i<numberOfInputs; i++) {
+            this.inPorts[i] = inputModel.inPorts[i];
+        }
+        this.outPort = outputModel.outPort;
     }
 
     public void tick(int[] netIn) {
@@ -22,6 +23,7 @@ public class NetworkModel extends Model {
         /** Lambda's */
         lambda();
 
+        /** Pass the value into the networks input Ports */
         for (int i =0; i<netIn.length; i++) {
             this.inPorts[i].currentValue = netIn[i];
         }

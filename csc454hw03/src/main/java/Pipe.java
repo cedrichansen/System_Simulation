@@ -12,6 +12,4 @@ public class Pipe {
         receiving.currentValue = sending.currentValue;
     }
 
-
-
 }
