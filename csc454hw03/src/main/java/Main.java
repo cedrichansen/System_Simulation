@@ -1,5 +1,4 @@
 
-
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -8,6 +7,7 @@ import java.io.File;
 public class Main {
 
     static NetworkModel network;
+
     public static void main(String[] args) {
 
         parseArgs(args);
@@ -20,15 +20,17 @@ public class Main {
     /**
      * This function propagates the input throughout the network
      */
-    private static int propagateTick(int [] netIn) {
+    private static int propagateTick(int[] netIn) {
 
-       network.tick(netIn);
-       return network.outPort.currentValue;
+
+        network.tick(netIn);
+
+        return network.outPort.currentValue;
     }
 
     private static void initializeNetworks() {
-        
-        int[] in = {0};
+
+        int[] in = { 0 };
 
         Port xor1_In1 = new Port();
         Port xor1_In2 = new Port();
@@ -40,12 +42,12 @@ public class Main {
         Port xor2_out = new Port();
         XORModel xor2 = new XORModel(in, xor2_In1, xor2_In2, xor2_out);
 
-        int[] mmInitial = {0, 0};
+        int[] mmInitial = { 0, 0 };
         Port mmIn = new Port();
         Port mmOut = new Port();
         MemoryModel mm = new MemoryModel(mmInitial, mmIn, mmOut);
 
-        network = new NetworkModel(in, xor1, xor2); 
+        network = new NetworkModel(in, xor1, xor2, 3);
 
         network.addPipe(new Pipe(xor1_out, xor2_In1));
         network.addPipe(new Pipe(mmOut, xor2_In2));
@@ -77,10 +79,10 @@ public class Main {
         while (sc.hasNextLine()) {
             String line = sc.nextLine();
 
-            String [] strs = line.split(" ");
+            String[] strs = line.split(" ");
             if (strs.length == 2) {
                 try {
-                    int [] input = convertToIntArray(line.split(" "));
+                    int[] input = convertToIntArray(line.split(" "));
                     System.out.println(input[0] + " " + input[1]);
                     if (Model.verbose) {
                         System.out.println("Network output: " + propagateTick(input));
@@ -89,7 +91,7 @@ public class Main {
                     }
                 } catch (NumberFormatException e) {
                     System.out.println(e.getMessage());
-                } catch (InvalidInputException e){
+                } catch (InvalidInputException e) {
                     System.out.println(e.getMessage());
                 }
             } else {
@@ -104,8 +106,7 @@ public class Main {
 
     }
 
-
-    static void parseArgs(String [] args) {
+    static void parseArgs(String[] args) {
         if (args.length != 0) {
             if (args[0].equals("-v")) {
                 System.out.println("Verbose mode has been enabled");
@@ -117,8 +118,9 @@ public class Main {
 
     }
 
-    public static void getUserInput(){
-        System.out.println("\nOn each tick, enter  \"0/1 0/1\" for an interactive input, \nor \"-b <filename>\" to process batch input from a file\n");
+    public static void getUserInput() {
+        System.out.println(
+                "\nOn each tick, enter  \"0/1 0/1\" for an interactive input, \nor \"-b <filename>\" to process batch input from a file\n");
 
         Scanner sc = new Scanner(System.in);
         System.out.println("Type \"0/1 0/1\" or \"-b <filename>\" when prompted for input");
@@ -126,7 +128,7 @@ public class Main {
 
         while (!command.equals("exit") && !command.equals("quit")) {
 
-            //process batch mode
+            // process batch mode
             if (command.split(" ")[0].equals("-b")) {
                 if (command.split(" ").length != 2) {
                     System.out.println("Must specify a filename after -b");
@@ -139,7 +141,7 @@ public class Main {
                 }
 
             } else {
-                //process regular interactive input
+                // process regular interactive input
                 try {
                     int[] input = convertToIntArray(command.split(" "));
                     if (input.length == 2) {
@@ -153,14 +155,13 @@ public class Main {
                     }
                 } catch (NumberFormatException e) {
                     System.out.println(e.getMessage());
-                } catch (InvalidInputException e){
+                } catch (InvalidInputException e) {
                     System.out.println(e.getMessage());
                 }
             }
 
             System.out.println();
             command = sc.nextLine();
-
 
         }
 
@@ -169,4 +170,3 @@ public class Main {
     }
 
 }
-
