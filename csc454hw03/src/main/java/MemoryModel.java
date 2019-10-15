@@ -19,11 +19,11 @@ public class MemoryModel extends Model {
     }
 
     @Override
-    public int [] delta(int [] inputSet) {
+    public void delta(int [] inputSet) {
         int x1 = this.state[1];
         int x2 = inputSet[0];
         int [] stateVals = {x1, x2};
-        return stateVals;
+        this.state = stateVals;
     }
 
 }

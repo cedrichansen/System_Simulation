@@ -15,10 +15,10 @@ public class XORModel extends Model {
         return this.state[0]; //corresponds to the statebit here
     }
 
-    public int [] delta(int [] inputSet) {
+    public void delta(int [] inputSet) {
         int res = inputSet[0] ^ inputSet[1];
         int [] stateVal = {res};
-        return stateVal;
+        this.state = stateVal;
     }
 
 }

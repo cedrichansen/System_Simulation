@@ -49,11 +49,11 @@ public class NetworkModel extends Model {
         return 0;
     }
 
-    public int[] delta(int[] inputSet) {
+    public void delta(int[] inputSet) {
         for (String model : children.keySet()) {
             Model currentModel = children.get(model);
             int[] inputs = currentModel.convertInPortsToIntArr();
-            currentModel.state = currentModel.delta(inputs);
+            currentModel.delta(inputs);
             if (verbose) {
                 String state = "";
                 for (int i = 0; i < currentModel.state.length; i++) {
@@ -63,8 +63,6 @@ public class NetworkModel extends Model {
                 System.out.println("New state for " + model + ": {" + state + "}");
             }
         }
-
-        return null;
     }
 
     public void executePipes() {
