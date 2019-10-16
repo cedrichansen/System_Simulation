@@ -9,5 +9,10 @@ public:
     {
         currentValue = 0;
     }
+
+    void setValue(int val) {
+        currentValue = val;
+    }
+    
 };
 #endif

@@ -12,8 +12,8 @@ public:
     bool verbose;
     int *state;
     int numberOfInputs;
-    Port outPort;
-    Port *inPorts;
+    Port * outPort;
+    Port **inPorts;
 
     int stateSize;
 
@@ -33,7 +33,7 @@ public:
         int *vals = new int[numberOfInputs];
         for (int i = 0; i < numberOfInputs; i++)
         {
-            vals[i] = inPorts[i].currentValue;
+            vals[i] = inPorts[i]->currentValue;
         }
         return vals;
     }

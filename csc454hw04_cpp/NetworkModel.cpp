@@ -6,6 +6,7 @@
 #include "Pipe.cpp"
 #include <string>
 #include <vector>
+#include<iostream> 
 
 using namespace std;
 
@@ -14,16 +15,14 @@ class NetworkModel : public Model
 
 public:
     map<string, Model *> children;
-    vector<Pipe *> pipes;
+    map<string, Pipe *> pipes;
     int numberOfTicks;
 
     NetworkModel(int *initial, Model *inputModel, Model *outputModel, int numTicks)
     {
         state = initial;
-        children = map<string, Model *>();
-        pipes = vector<Pipe *>();
         numberOfInputs = inputModel->numberOfInputs;
-        inPorts = new Port[numberOfInputs];
+        inPorts = new Port*[numberOfInputs];
         for (int i = 0; i < numberOfInputs; i++)
         {
             inPorts[i] = inputModel->inPorts[i];
@@ -41,7 +40,7 @@ public:
 
             for (int i = 0; i < numberOfInputs; i++)
             {
-                inPorts[i].currentValue = netIn[i];
+                inPorts[i]->currentValue = netIn[i];
             }
 
             executePipes();
@@ -56,8 +55,10 @@ public:
         for (itr = children.begin(); itr != children.end(); itr++)
         {
             Model *currentModel = itr->second;
-            currentModel->outPort.currentValue = currentModel->lambda();
-            debugPrint("Lambda from " + itr->first + ": " + to_string(currentModel->lambda()));
+            int value = currentModel->lambda();
+            printf("%s passing %d into outputport\n", itr->first.c_str(), value);
+            currentModel->outPort->setValue(value);
+            debugPrint("Lambda from " + itr->first + ": " + to_string(value));
         }
         return 0;
     }
@@ -70,6 +71,7 @@ public:
             Model * currentModel = itr->second;
             int * inputs = currentModel->convertInPortsToIntArr();
             currentModel->delta(inputs);
+            delete inputs;
             if (verbose) {
                 string state = "";
                 for (int i=0; i< currentModel->stateSize; i++) {
@@ -83,20 +85,29 @@ public:
 
     void executePipes()
     {
-        for (int i = 0; i < pipes.size(); i++)
+        map<string, Pipe *>::iterator itr;
+        for (itr = pipes.begin(); itr != pipes.end(); itr++)
         {
-            pipes[i]->passValue();
+            itr->second->passValue();
         }
     }
 
     void addModel(string modelName, Model *m)
     {
-        children[modelName] = m;
+        children.insert(pair<string, Model*>(modelName, m));
+    }
+
+    void addPipe(string pipeName, Pipe * pipe) {
+        pipes.insert(pair<string, Pipe*>(pipeName, pipe));
     }
 
     ~NetworkModel()
     {
-        delete inPorts;
+        for (int i = 0; i < numberOfInputs; i++)
+        {
+            delete inPorts[i];
+        }
+        delete[] inPorts;
     }
 };
 
