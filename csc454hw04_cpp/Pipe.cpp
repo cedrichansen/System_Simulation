@@ -17,10 +17,7 @@ public:
     }
 
     void passValue(){
-        //printf("receiving value %d Sending value %d",receiving->currentValue, sending->currentValue);
         receiving->currentValue = sending->currentValue;
-        //printf("---- Post pass| receiving value %d Sending value %d\n",receiving->currentValue, sending->currentValue);
-
     }
 };
 #endif

@@ -3,6 +3,8 @@
 
 #include "Model.cpp"
 #include "Port.cpp"
+#include <cstdio>   //for printf
+
 
 class XORModel : public Model
 {
@@ -10,7 +12,8 @@ class XORModel : public Model
 public:
     XORModel(int *initial, Port *input1, Port *input2, Port *output)
     {
-        state = initial;
+        state = new int [1];
+        state[0] = initial[0];
         outPort = output;
         numberOfInputs = 2;
         inPorts = new Port*[numberOfInputs];

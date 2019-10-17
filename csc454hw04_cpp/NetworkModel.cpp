@@ -14,13 +14,12 @@ class NetworkModel : public Model
 {
 
 public:
-    map<string, Model *> children;
-    map<string, Pipe *> pipes;
+    map<string, Model *> *children;
+    map<string, Pipe *> *pipes;
     int numberOfTicks;
 
-    NetworkModel(int *initial, Model *inputModel, Model *outputModel, int numTicks)
+    NetworkModel(Model *inputModel, Model *outputModel, int numTicks)
     {
-        state = initial;
         numberOfInputs = inputModel->numberOfInputs;
         inPorts = new Port*[numberOfInputs];
         for (int i = 0; i < numberOfInputs; i++)
@@ -29,6 +28,8 @@ public:
         }
         outPort = outputModel->outPort;
         numberOfTicks = numTicks;
+        pipes = new map<string, Pipe*>();
+        children = new map<string, Model*>();
     }
 
     void tick(int *netIn)
@@ -52,11 +53,10 @@ public:
     int lambda()
     {
         map<string, Model *>::iterator itr;
-        for (itr = children.begin(); itr != children.end(); itr++)
+        for (itr = children->begin(); itr != children->end(); itr++)
         {
             Model *currentModel = itr->second;
             int value = currentModel->lambda();
-            printf("%s passing %d into outputport\n", itr->first.c_str(), value);
             currentModel->outPort->setValue(value);
             debugPrint("Lambda from " + itr->first + ": " + to_string(value));
         }
@@ -66,7 +66,7 @@ public:
     void delta(int *inputSet)
     {
         map<string, Model *>::iterator itr;
-        for (itr = children.begin(); itr != children.end(); itr++)
+        for (itr = children->begin(); itr != children->end(); itr++)
         {
             Model * currentModel = itr->second;
             int * inputs = currentModel->convertInPortsToIntArr();
@@ -86,7 +86,7 @@ public:
     void executePipes()
     {
         map<string, Pipe *>::iterator itr;
-        for (itr = pipes.begin(); itr != pipes.end(); itr++)
+        for (itr = pipes->begin(); itr != pipes->end(); itr++)
         {
             itr->second->passValue();
         }
@@ -94,11 +94,11 @@ public:
 
     void addModel(string modelName, Model *m)
     {
-        children.insert(pair<string, Model*>(modelName, m));
+        children->insert(pair<string, Model*>(modelName, m));
     }
 
     void addPipe(string pipeName, Pipe * pipe) {
-        pipes.insert(pair<string, Pipe*>(pipeName, pipe));
+        pipes->insert(pair<string, Pipe*>(pipeName, pipe));
     }
 
     ~NetworkModel()

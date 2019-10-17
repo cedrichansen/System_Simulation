@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     Port *mmOut = new Port();
     MemoryModel *mm = new MemoryModel(mmInitial, mmIn, mmOut);
 
-    NetworkModel *network = new NetworkModel(initialState, xor1, xor2, 3);
+    NetworkModel *network = new NetworkModel(xor1, xor2, 3);
 
     Pipe * p1 = new Pipe(xor1_out, xor2_In1); 
     network->addPipe("p1", p1);
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     if (verbose)
     {
         map<string, Model *>::iterator itr;
-        for (itr = network->children.begin(); itr != network->children.end(); itr++)
+        for (itr = network->children->begin(); itr != network->children->end(); itr++)
         {
             Model *current = itr->second;
             current->verbose = true;
@@ -70,35 +70,29 @@ int main(int argc, char **argv)
     }
 
     printf("\nOn each tick, enter  \"0/1 0/1\" for an interactive input, or '-1 -1' to exit \n");
-    int a = 1;
+    int a = 0;
     int b = 0;
 
-    int vals[] = {1, 0};
-    printf("%d %d\n", vals[0], vals[1]);
-    network->tick(vals);
-    printf("%d %d\n", vals[0], vals[1]);
-    network->tick(vals);
+    do
+    {
 
-    // do
-    // {
+        scanf("%d %d", &a, &b);
+        if ((a == 0 || a == 1) && (b == 0 || b == 1))
+        {
+            int in[] = {a, b};
+            network->tick(in);
+            printf("%d\n", network->outPort->currentValue);
+        }
+        else if (a == -1 && b == -1)
+        {
+            //silently die
+        }
+        else
+        {
+            printf("Invalid input was entered\n");
+        }
 
-    //     scanf("%d %d", &a, &b);
-    //     if ((a == 0 || a == 1) && (b == 0 || b == 1))
-    //     {
-    //         int in[] = {a, b};
-    //         network->tick(in);
-    //         printf("%d\n", network->outPort->currentValue);
-    //     }
-    //     else if (a == -1 && b == -1)
-    //     {
-    //         //silently die
-    //     }
-    //     else
-    //     {
-    //         printf("Invalid input was entered\n");
-    //     }
-
-    // } while (a != -1 && b != -1);
+    } while (a != -1 && b != -1);
 
     network->~NetworkModel();
     xor1->~XORModel();

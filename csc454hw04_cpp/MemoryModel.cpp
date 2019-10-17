@@ -10,7 +10,9 @@ class MemoryModel : public Model
 public:
     MemoryModel(int *initialState, Port *in, Port *out)
     {
-        state = initialState;
+        state = new int [2];
+        state[0] = initialState[0];
+        state[1]= initialState[1];
         outPort = out;
         numberOfInputs = 1;
         inPorts = new Port *[numberOfInputs];
@@ -36,6 +38,7 @@ public:
             delete inPorts[i];
         }
         delete[] inPorts;
+        delete state;
     }
 };
 
