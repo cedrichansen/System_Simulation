@@ -12,7 +12,7 @@ public:
     bool verbose;
     int *state;
     int numberOfInputs;
-    Port * outPort;
+    Port *outPort;
     Port **inPorts;
 
     int stateSize;

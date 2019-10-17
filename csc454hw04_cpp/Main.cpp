@@ -95,9 +95,6 @@ int main(int argc, char **argv)
     } while (a != -1 && b != -1);
 
     network->~NetworkModel();
-    xor1->~XORModel();
-    xor2->~XORModel();
-    mm->~MemoryModel();
 
     return 0;
 }

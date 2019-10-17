@@ -20,6 +20,6 @@ public:
         receiving->currentValue = sending->currentValue;
     }
 
-    
+
 };
 #endif

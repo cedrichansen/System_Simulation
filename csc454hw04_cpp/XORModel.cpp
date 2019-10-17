@@ -40,7 +40,6 @@ public:
         delete[] inPorts;
         delete outPort;
         delete state;
-
     }
 };
 

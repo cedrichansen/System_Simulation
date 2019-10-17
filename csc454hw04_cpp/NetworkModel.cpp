@@ -104,11 +104,21 @@ public:
     ~NetworkModel()
     {
 
-        map<string, Pipe *>::iterator itr;
-        for (itr = pipes->begin(); itr != pipes->end(); itr++)
-        {
+        map<string, Model *>::iterator itr;
+        for (itr = children->begin(); itr != children->end(); itr++)
+        {   
             delete itr->second;
         }
+        children->clear();
+        delete children;
+
+
+        map<string, Pipe *>::iterator itra;
+        for (itra = pipes->begin(); itra != pipes->end(); itra++)
+        {
+            delete itra->second;
+        }
+        pipes->clear();
         delete pipes;
         
     }
