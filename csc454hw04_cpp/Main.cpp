@@ -98,17 +98,6 @@ int main(int argc, char **argv)
     xor1->~XORModel();
     xor2->~XORModel();
     mm->~MemoryModel();
-    delete p1;
-    delete p2;
-    delete p3;
-    delete xor1_In1;
-    delete xor1_In2;
-    delete xor1_out;
-    delete xor2_In1;
-    delete xor2_In2;
-    delete xor2_out;
-    delete mmIn;
-    delete mmOut;
 
     return 0;
 }

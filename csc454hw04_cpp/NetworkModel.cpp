@@ -103,7 +103,14 @@ public:
 
     ~NetworkModel()
     {
-        delete[] inPorts;
+
+        map<string, Pipe *>::iterator itr;
+        for (itr = pipes->begin(); itr != pipes->end(); itr++)
+        {
+            delete itr->second;
+        }
+        delete pipes;
+        
     }
 };
 

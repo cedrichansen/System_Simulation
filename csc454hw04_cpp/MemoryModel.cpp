@@ -33,7 +33,11 @@ public:
 
     ~MemoryModel()
     {
+        for (int i = 0; i<numberOfInputs; i++) {
+            delete inPorts[i];
+        }
         delete[] inPorts;
+        delete outPort;
         delete state;
     }
 };
