@@ -19,5 +19,7 @@ public:
     void passValue(){
         receiving->currentValue = sending->currentValue;
     }
+
+    
 };
 #endif

@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         }
     }
 
-    //if verbose, loop through all of the models and set the debug to true
+    /** Free all objects placed on heap below (bottom of main)*/
     int initialState[] = {0};
     Port *xor1_In1 = new Port();
     Port *xor1_In2 = new Port();
@@ -101,6 +101,14 @@ int main(int argc, char **argv)
     delete p1;
     delete p2;
     delete p3;
+    delete xor1_In1;
+    delete xor1_In2;
+    delete xor1_out;
+    delete xor2_In1;
+    delete xor2_In2;
+    delete xor2_out;
+    delete mmIn;
+    delete mmOut;
 
     return 0;
 }
