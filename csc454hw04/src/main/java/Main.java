@@ -5,8 +5,7 @@ import java.util.Scanner;
 
 public class Main 
 {
-    public static void main( String[] args) throws FileNotFoundException
-    {
+    public static void main( String[] args) throws FileNotFoundException, InterruptedException {
         VendingMachine vm = new VendingMachine(0,0,0);
 
         ArrayList<String[]> inputs = getInputTrajectory("trajectory.txt");

@@ -5,6 +5,7 @@ public class VendingMachine extends Model {
     final static int DIME_VALUE = 10;
     final static int NICKEL_VALUE = 5;
     final static int COFFEE_PRICE = 100;
+    final static double TIME_ADVANCE = 2;
 
     int quarters;
     int dimes;
@@ -22,37 +23,44 @@ public class VendingMachine extends Model {
     @Override
     public String lambda() {
 
-        String ret = "{";
+        String ret = "";
         int coffees = numCoffeesToDispense();
-        for (int i =0; i<coffees; i++) {
+        for (int i = 0; i < coffees; i++) {
             ret += "COFFEE, ";
         }
         int change = amountOfChangeToGive(coffees);
         try {
             int[] coinsToGive = getChange(change);
             ret += getChangeCoinsStr(coinsToGive);
+            if (getChangeCoinsStr(coinsToGive).length() == 0) {
+                ret = ret.substring(0, ret.length() - 2);
+            }
 
         } catch (VendingMachineException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        //remove last comma
-        ret = ret.substring(0, ret.length() - 1);
-        return ret + "}";
+        // remove last comma
+        return "{" + ret + "}";
     }
 
-    public String getChangeCoinsStr(int [] coins) {
+    public String getChangeCoinsStr(int[] coins) {
         String coinsStr = "";
-        for (int i=0; i<coins[0]; i++) {
+        for (int i = 0; i < coins[0]; i++) {
             coinsStr += "n, ";
         }
-        for (int i=0; i<coins[1]; i++) {
+        for (int i = 0; i < coins[1]; i++) {
             coinsStr += "d, ";
         }
-        for (int i=0; i<coins[2]; i++) {
+        for (int i = 0; i < coins[2]; i++) {
             coinsStr += "q, ";
         }
+
+        if (coinsStr.length() != 0) {
+            coinsStr = coinsStr.substring(0, coinsStr.length() - 2);
+        }
+
         return coinsStr;
     }
 
@@ -65,13 +73,13 @@ public class VendingMachine extends Model {
     public void externalTransition(String input) throws IllegalInputException {
         if (input.equals("q")) {
             quarters++;
-            customerValue += 25;
+            customerValue += QUARTER_VALUE;
         } else if (input.equals("d")) {
             dimes++;
-            customerValue += 10;
+            customerValue += DIME_VALUE;
         } else if (input.equals("n")) {
             nickels++;
-            customerValue += 5;
+            customerValue += NICKEL_VALUE;
         } else {
             throw new IllegalInputException(input);
         }
@@ -82,23 +90,29 @@ public class VendingMachine extends Model {
      * change, or both
      */
     @Override
-    public void internalTranstion() {
+    public String internalTransition() {
+        String s = "";
         try {
-            lambda();
+            s = lambda();
 
             { /** Change state of the vending machine internally */
                 int coffees = numCoffeesToDispense();
-                customerValue -= coffees * COFFEE_PRICE;
                 int change = amountOfChangeToGive(coffees);
                 int[] coinsToGive = getChange(change);
+                customerValue -= coffees * COFFEE_PRICE;
+                customerValue -= NICKEL_VALUE * coinsToGive[0];
+                customerValue -= DIME_VALUE * coinsToGive[1];
+                customerValue -= QUARTER_VALUE * coinsToGive[2];
                 nickels -= coinsToGive[0];
                 dimes -= coinsToGive[1];
                 quarters -= coinsToGive[2];
             }
-            
+
         } catch (VendingMachineException e) {
             e.printStackTrace();
+            System.exit(1);
         }
+        return s;
     }
 
     public int numCoffeesToDispense() {
@@ -157,9 +171,10 @@ public class VendingMachine extends Model {
      * @throws IllegalInputException
      */
     @Override
-    public void confluentTransition(String input) throws IllegalInputException {
-        internalTranstion();
+    public String confluentTransition(String input) throws IllegalInputException {
+        String s = internalTransition();
         externalTransition(input);
+        return s;
     }
 
     /**
@@ -168,7 +183,17 @@ public class VendingMachine extends Model {
      */
     @Override
     public double timeAdvance() {
-        return customerValue > 0 ? (double) 2 : Double.MAX_VALUE;
+        return customerValue > 0 ? (double) TIME_ADVANCE : Double.MAX_VALUE;
+    }
+
+    @Override
+    public double getMaxTimeAdvance() {
+        return Double.MAX_VALUE;
+    }
+
+
+    public String toString(){
+        return "Balance: $" + (float)customerValue/(float)100;
     }
 
 }
