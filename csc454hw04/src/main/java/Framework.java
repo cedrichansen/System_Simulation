@@ -66,6 +66,7 @@ public class Framework {
         if (model.timeAdvance().realTime != model.getMaxTimeAdvance()) {
             Thread.sleep((long) (1000 * model.timeAdvance().realTime));
             timeElapsed = timeElapsed.timeAdvance(model.timeAdvance());
+            System.out.println("internal");
             System.out.println("Real Time: " + timeElapsed.realTime + " Output: " + model.lambda());
             model.internalTransition();
             System.out.println(model.toString() + "\n");
@@ -82,7 +83,6 @@ public class Framework {
                 System.out.println("Real Time: " + realTime.realTime); 
                 System.out.println("Output: " + model.lambda());
                 model.internalTransition();
-
 
             } else if (timeAdvance.greaterThan(timeSinceLastInput)) {
                 // execute external transition
@@ -102,11 +102,12 @@ public class Framework {
             timeAdvance = model.timeAdvance();
 
             while (timeAdvance.realTime == 0) {
-                //the model needs to do more stuff at the real moment in time
-                // Put whatever model needs to do at that moment in time
-                // not explicitly needed in this case
+                // Whatever model needs to do if timeadvance is 0 --- does not happen in this current project
                 timeAdvance.discreteTime++;
-                System.out.println(timeAdvance);
+                System.out.println("Time: " + timeAdvance.toString());
+                System.out.println("Output: " + model.lambda());
+                model.internalTransition();
+                timeAdvance = model.timeAdvance();
             }
         } catch (IllegalInputException e) {
             System.out.println(e.message);

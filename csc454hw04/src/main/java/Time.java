@@ -42,7 +42,7 @@ public class Time implements Comparable<Time>{
 
     /** Rounds v to nearest hundredth*/
     public double round(double v) {
-        return Math.round(v * 100.0) / 100.0;
+        return Math.round(v * 10000.0) / 10000.0;
     }
 
     public String toString(){
