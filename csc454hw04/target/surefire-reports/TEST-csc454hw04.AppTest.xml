@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="csc454hw04.AppTest" time="0.046" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="csc454hw04.AppTest" time="0.069" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="gopherProxySet" value="false"/>
     <property name="awt.toolkit" value="sun.lwawt.macosx.LWCToolkit"/>
@@ -17,7 +17,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="CA"/>
     <property name="sun.boot.library.path" value="/Library/Java/JavaVirtualMachines/jdk-9.0.4.jdk/Contents/Home/lib"/>
-    <property name="sun.java.command" value="/Users/cedrichansen/Programs/csc454/csc454hw04/target/surefire/surefirebooter16624510305632429820.jar /Users/cedrichansen/Programs/csc454/csc454hw04/target/surefire 2019-10-23T10-05-47_748-jvmRun1 surefire1495548789161062647tmp surefire_03806834496257723922tmp"/>
+    <property name="sun.java.command" value="/Users/cedrichansen/Programs/csc454/csc454hw04/target/surefire/surefirebooter1924575947100673572.jar /Users/cedrichansen/Programs/csc454/csc454hw04/target/surefire 2019-10-23T11-08-35_860-jvmRun1 surefire12685918142156836824tmp surefire_04465620940342600737tmp"/>
     <property name="http.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/Users/cedrichansen/Programs/csc454/csc454hw04/target/test-classes:/Users/cedrichansen/Programs/csc454/csc454hw04/target/classes:/Users/cedrichansen/.m2/repository/junit/junit/4.11/junit-4.11.jar:/Users/cedrichansen/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar:"/>
@@ -33,7 +33,7 @@
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.awt.graphicsenv" value="sun.awt.CGraphicsEnvironment"/>
-    <property name="surefire.real.class.path" value="/Users/cedrichansen/Programs/csc454/csc454hw04/target/surefire/surefirebooter16624510305632429820.jar"/>
+    <property name="surefire.real.class.path" value="/Users/cedrichansen/Programs/csc454/csc454hw04/target/surefire/surefirebooter1924575947100673572.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="ftp.nonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.runtime.version" value="9.0.4+11"/>
@@ -60,5 +60,5 @@
     <property name="java.class.version" value="53.0"/>
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
   </properties>
-  <testcase name="shouldAnswerWithTrue" classname="csc454hw04.AppTest" time="0.004"/>
+  <testcase name="shouldAnswerWithTrue" classname="csc454hw04.AppTest" time="0.003"/>
 </testsuite>

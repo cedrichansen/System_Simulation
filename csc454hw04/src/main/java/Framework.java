@@ -9,6 +9,7 @@ public class Framework {
      */
     Model model;
     int discreteTime;
+    final double THRESHOLD = 0.01;
 
     public Framework(ArrayList<String[]> inputTrajectory, Model m) {
         this.inputTrajectory = inputTrajectory;
@@ -19,73 +20,94 @@ public class Framework {
     public void start() throws InterruptedException {
         System.out.println(
                 "Welcome to vending machine simulator xTreme 9000\nOutput/Input will automatically be processed as per the specified input trajectory\n");
-        float timeSincePreviousEvent = 0;
-        float sleepTimer = 0;
-        float timeElapsed = 0;
-        float inputTime = 0;
-        float timeAdvance = 0;
+        Time timeSincePreviousEvent;
+        Time sleepTimer;
+        Time timeElapsed = new Time(0,0);
+        Time inputTime;
+        Time timeAdvance;
 
         for (int i = 0; i < inputTrajectory.size(); i++) {
 
-            timeAdvance = (float) model.timeAdvance();
-            inputTime = Float.parseFloat(inputTrajectory.get(i)[0]);
-            timeSincePreviousEvent = inputTime - timeElapsed;
-            sleepTimer = timeAdvance > timeSincePreviousEvent ? timeSincePreviousEvent : timeAdvance;
+            timeAdvance = model.timeAdvance(); 
+            inputTime = new Time(Double.parseDouble(inputTrajectory.get(i)[0]), 0); //real input events are always 0 on discrete axis
+            timeSincePreviousEvent = inputTime.since(timeElapsed);
 
-            Thread.sleep((long) sleepTimer * 1000);
-            timeElapsed += sleepTimer;
+            if (timeAdvance.realTime > timeSincePreviousEvent.realTime) {
+                sleepTimer = timeSincePreviousEvent;
+            } else {
+                sleepTimer = timeAdvance;
+            }
+
+            Thread.sleep((long) sleepTimer.realTime * 1000);
+
+            timeElapsed = timeElapsed.timeAdvance(sleepTimer);
 
 
             processStep(inputTrajectory.get(i), timeSincePreviousEvent, timeAdvance, timeElapsed);
 
             //since the internal transition happened, we still need to process the current input
-            if (sleepTimer != timeSincePreviousEvent) {
-                timeAdvance = (float) model.timeAdvance();
-                timeSincePreviousEvent = inputTime - timeElapsed;
-                sleepTimer = timeAdvance > timeSincePreviousEvent ? timeSincePreviousEvent : timeAdvance;
+            if (sleepTimer.realTime != timeSincePreviousEvent.realTime) {
+                timeAdvance = model.timeAdvance();
+                timeSincePreviousEvent = inputTime.since(timeElapsed);
+                if (timeAdvance.realTime > timeSincePreviousEvent.realTime) {
+                    sleepTimer = timeSincePreviousEvent;
+                } else {
+                    sleepTimer = timeAdvance;
+                }
 
-                Thread.sleep((long) sleepTimer * 1000);
-                timeElapsed += sleepTimer;
+                Thread.sleep((long) sleepTimer.realTime * 1000);
+                timeElapsed = timeElapsed.timeAdvance(sleepTimer);
 
                 processStep(inputTrajectory.get(i), timeSincePreviousEvent, timeAdvance, timeElapsed);
             }
         }
 
         //let the internal clock expire if needed
-        if (model.timeAdvance() != model.getMaxTimeAdvance()) {
-            Thread.sleep((long) (1000 * model.timeAdvance()));
-            System.out.println("Real Time: " + (timeElapsed + model.timeAdvance()) + " Output: " + model.lambda());
+        if (model.timeAdvance().realTime != model.getMaxTimeAdvance()) {
+            Thread.sleep((long) (1000 * model.timeAdvance().realTime));
+            timeElapsed = timeElapsed.timeAdvance(model.timeAdvance());
+            System.out.println("Real Time: " + timeElapsed.realTime + " Output: " + model.lambda());
             model.internalTransition();
             System.out.println(model.toString() + "\n");
         }
 
     }
 
-    public void processStep(String[] input, float timeSinceLastInput, float timeAdvance, float realTime) {
+    public void processStep(String[] input, Time timeSinceLastInput, Time timeAdvance, Time realTime) {
 
         try {
-            if (timeSinceLastInput > timeAdvance) {
+                if (timeSinceLastInput.greaterThan(timeAdvance)) {
                 // execute internal transition
                 System.out.println("internal");
-                System.out.println("Real Time: " + realTime); 
+                System.out.println("Real Time: " + realTime.realTime); 
                 System.out.println("Output: " + model.lambda());
                 model.internalTransition();
 
 
-            } else if (timeSinceLastInput < timeAdvance) {
+            } else if (timeAdvance.greaterThan(timeSinceLastInput)) {
                 // execute external transition
                 System.out.println("external");
-                System.out.println("Real Time: " + realTime + "\nInput: " + input[1]);
+                System.out.println("Real Time: " + realTime.realTime + "\nInput: " + input[1]);
                 model.externalTransition(input[1]);
 
             } else {
                 // They must be equal! confluent case
                 System.out.println("confluent");
-                System.out.println("Real Time: " + realTime + " Input:" + input[1]);
+                System.out.println("Real Time: " + realTime.realTime + " Input:" + input[1]);
                 System.out.println("Output: " + model.lambda());
                 model.confluentTransition(input[1]);
             }
             System.out.println(model.toString() + "\n");
+
+            timeAdvance = model.timeAdvance();
+
+            while (timeAdvance.realTime == 0) {
+                //the model needs to do more stuff at the real moment in time
+                // Put whatever model needs to do at that moment in time
+                // not explicitly needed in this case
+                timeAdvance.discreteTime++;
+                System.out.println(timeAdvance);
+            }
         } catch (IllegalInputException e) {
             System.out.println(e.message);
         }

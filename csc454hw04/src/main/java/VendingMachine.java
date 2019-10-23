@@ -177,8 +177,13 @@ public class VendingMachine extends Model {
      * else it is 2 seconds
      */
     @Override
-    public double timeAdvance() {
-        return customerValue > 0 ? (double) TIME_ADVANCE : Double.MAX_VALUE;
+    public Time timeAdvance() {
+        if (customerValue > 0) {
+            return new Time(TIME_ADVANCE, 0);
+        } else {
+            return new Time(Double.MAX_VALUE, 0);
+        } 
+        //time advance real componant cannot be 0 in this particular case
     }
 
     @Override
