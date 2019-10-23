@@ -90,11 +90,8 @@ public class VendingMachine extends Model {
      * change, or both
      */
     @Override
-    public String internalTransition() {
-        String s = "";
+    public void internalTransition() {
         try {
-            s = lambda();
-
             { /** Change state of the vending machine internally */
                 int coffees = numCoffeesToDispense();
                 int change = amountOfChangeToGive(coffees);
@@ -112,7 +109,6 @@ public class VendingMachine extends Model {
             e.printStackTrace();
             System.exit(1);
         }
-        return s;
     }
 
     public int numCoffeesToDispense() {
@@ -171,10 +167,9 @@ public class VendingMachine extends Model {
      * @throws IllegalInputException
      */
     @Override
-    public String confluentTransition(String input) throws IllegalInputException {
-        String s = internalTransition();
+    public void confluentTransition(String input) throws IllegalInputException {
+        internalTransition();
         externalTransition(input);
-        return s;
     }
 
     /**

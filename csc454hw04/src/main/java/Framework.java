@@ -54,7 +54,8 @@ public class Framework {
         //let the internal clock expire if needed
         if (model.timeAdvance() != model.getMaxTimeAdvance()) {
             Thread.sleep((long) (1000 * model.timeAdvance()));
-            System.out.println("Real Time: " + (timeElapsed + model.timeAdvance()) + " Output: " + model.internalTransition());
+            System.out.println("Real Time: " + (timeElapsed + model.timeAdvance()) + " Output: " + model.lambda());
+            model.internalTransition();
             System.out.println(model.toString() + "\n");
         }
 
@@ -65,22 +66,28 @@ public class Framework {
         try {
             if (timeSinceLastInput > timeAdvance) {
                 // execute internal transition
-                System.out.println("Real Time: " + realTime + " Output: " + model.internalTransition());
+                System.out.println("internal");
+                System.out.println("Real Time: " + realTime); 
+                System.out.println("Output: " + model.lambda());
+                model.internalTransition();
 
 
             } else if (timeSinceLastInput < timeAdvance) {
                 // execute external transition
-                System.out.println("Real Time: " + realTime + " Input: " + input[1]);
+                System.out.println("external");
+                System.out.println("Real Time: " + realTime + "\nInput: " + input[1]);
                 model.externalTransition(input[1]);
 
             } else {
                 // They must be equal! confluent case
+                System.out.println("confluent");
                 System.out.println("Real Time: " + realTime + " Input:" + input[1]);
-                System.out.println("Output: " + model.confluentTransition(input[1]));
+                System.out.println("Output: " + model.lambda());
+                model.confluentTransition(input[1]);
             }
             System.out.println(model.toString() + "\n");
         } catch (IllegalInputException e) {
-            e.printStackTrace();
+            System.out.println(e.message);
         }
 
     }
