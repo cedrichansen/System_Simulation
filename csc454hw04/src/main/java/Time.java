@@ -23,6 +23,11 @@ public class Time implements Comparable<Time>{
         return this.realTime == o.realTime;
     }
 
+    @Override
+    public int hashCode() {
+        return Double.valueOf(realTime).hashCode() ^ Integer.valueOf(discreteTime).hashCode();
+    }
+
     public boolean greaterThan(Time o) {
         return this.compareTo(o) >= 1;
     }
