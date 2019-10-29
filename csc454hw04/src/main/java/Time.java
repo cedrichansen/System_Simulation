@@ -1,6 +1,8 @@
-public class Time implements Comparable<Time>{
-    public double realTime;
-    public int discreteTime;
+import java.util.Objects;
+
+public class Time implements Comparable<Time> {
+    public final double realTime;
+    public final int discreteTime;
 
     public Time (double r, int d) {
         realTime = r;
@@ -25,7 +27,8 @@ public class Time implements Comparable<Time>{
 
     @Override
     public int hashCode() {
-        return Double.valueOf(realTime).hashCode() ^ Integer.valueOf(discreteTime).hashCode();
+     //   return Double.valueOf(realTime).hashCode() ^ Integer.valueOf(discreteTime).hashCode();
+     return Objects.hash(realTime, discreteTime);
     }
 
     public boolean greaterThan(Time o) {

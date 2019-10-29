@@ -1,1 +1,7 @@
+VendingMachine.class
 Main.class
+IllegalInputException.class
+Time.class
+Framework.class
+VendingMachineException.class
+Model.class

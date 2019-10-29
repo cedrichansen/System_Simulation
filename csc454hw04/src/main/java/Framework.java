@@ -10,6 +10,7 @@ public class Framework {
     Model model;
     int discreteTime;
     final double THRESHOLD = 0.01;
+    final Time MIN_INCREMENT = new Time(0, 1);
 
     public Framework(ArrayList<String[]> inputTrajectory, Model m) {
         this.inputTrajectory = inputTrajectory;
@@ -103,7 +104,7 @@ public class Framework {
 
             while (timeAdvance.realTime == 0) {
                 // Whatever model needs to do if timeadvance is 0 --- does not happen in this current project
-                timeAdvance.discreteTime++;
+                timeAdvance = timeAdvance.timeAdvance(MIN_INCREMENT); //advance by minimum increment instead
                 System.out.println("Time: " + timeAdvance.toString());
                 System.out.println("Output: " + model.lambda());
                 model.internalTransition();
