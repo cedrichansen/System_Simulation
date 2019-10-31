@@ -132,19 +132,6 @@ public:
             }
             model->print();
             
-            // delete timeAdvance;
-            // timeAdvance = model->timeAdvance();
-
-            // while (timeAdvance->realTime == 0) {
-            //     // Whatever model needs to do if timeadvance is 0 --- does not happen in this current project
-            //     timeAdvance->timeAdvance(MIN_INCREMENT); //advance by minimum increment instead
-            //     printf("Time: %s\n" , timeAdvance->toString().c_str());
-            //     printf("Output: %s\n", model->lambda().c_str());
-            //     model->internalTransition();
-            //     delete timeAdvance;
-            //     timeAdvance = model->timeAdvance();
-            // }
-            // delete timeAdvance;
     }
 
     /** Rounds v to nearest hundredth*/
