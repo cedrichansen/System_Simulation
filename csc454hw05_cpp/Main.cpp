@@ -34,6 +34,5 @@ int main()
     f->start();
 
     delete f;
-    delete inputs;
     return 0;
 }
