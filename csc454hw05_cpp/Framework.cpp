@@ -88,10 +88,12 @@ public:
             }
         }
 
+        delete timeAdvance;
+        timeAdvance = model->timeAdvance();
         //let the internal clock expire if needed
-        if (model->timeAdvance()->realTime != model->getMaxTimeAdvance()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds((int)(model->timeAdvance()->realTime) * 1000));
-            timeElapsed->timeAdvance(model->timeAdvance());
+        if (timeAdvance->realTime != model->getMaxTimeAdvance()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds((int)(timeAdvance->realTime) * 1000));
+            timeElapsed->timeAdvance(timeAdvance);
             printf("internal\n");
             printf("Real Time: %.2f Output %s\n", timeElapsed->realTime, model->lambda().c_str());
             model->internalTransition();
