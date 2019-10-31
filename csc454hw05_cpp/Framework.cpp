@@ -35,47 +35,54 @@ public:
     {
         printf( "Welcome to vending machine simulator xTreme 9000\nOutput/Input will automatically be processed as per the specified input trajectory\n");
 
-        Time * timeSincePreviousEvent;
-        Time * sleepTimer;
+        Time * timeSincePreviousEvent = new Time(0,0);
+        Time * sleepTimer = new Time(0,0);
         Time * timeElapsed = new Time(0,0);
-        Time * inputTime;
-        Time * timeAdvance;
+        Time * inputTime = new Time(0,0);
+        Time * timeAdvance = new Time(0,0);
 
         for (int i = 0; i < numInputs; i++) {
 
             std::string currentStep =  inputTrajectory[i];
             std::string coin = currentStep.substr(currentStep.find(",") + 1, currentStep.length());
             double time = roundDouble(std::stod(currentStep.substr(0, currentStep.find(","))));
-
+            
+            delete timeAdvance;
             timeAdvance = model->timeAdvance(); 
             
-            inputTime = new Time(time, 0); //real input events are always 0 on discrete axis
+            inputTime->changeTime(time, 0);
+
+            delete timeSincePreviousEvent;
             timeSincePreviousEvent = inputTime->since(timeElapsed);
 
+            delete sleepTimer;
             if (timeAdvance->realTime > timeSincePreviousEvent->realTime) {
-                sleepTimer = timeSincePreviousEvent;
+                sleepTimer = new Time(timeSincePreviousEvent->realTime, timeSincePreviousEvent->discreteTime);
             } else {
-                sleepTimer = timeAdvance;
+                sleepTimer = new Time(timeAdvance->realTime, timeAdvance->discreteTime);
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds((int)(sleepTimer->realTime * 1000)));
 
-            timeElapsed = timeElapsed->timeAdvance(sleepTimer);
+            timeElapsed->timeAdvance(sleepTimer);
 
             processStep(coin, timeSincePreviousEvent, timeAdvance, timeElapsed);
 
             //since the internal transition happened, we still need to process the current input
             if (sleepTimer->realTime != timeSincePreviousEvent->realTime) {
+                delete timeAdvance;
                 timeAdvance = model->timeAdvance();
+                delete timeSincePreviousEvent;
                 timeSincePreviousEvent = inputTime->since(timeElapsed);
+                delete sleepTimer;
                 if (timeAdvance->realTime > timeSincePreviousEvent->realTime) {
-                    sleepTimer = timeSincePreviousEvent;
+                    sleepTimer = new Time(timeSincePreviousEvent->realTime, timeSincePreviousEvent->discreteTime);
                 } else {
-                    sleepTimer = timeAdvance;
+                    sleepTimer = new Time(timeAdvance->realTime, timeAdvance->discreteTime);
                 }
 
                 std::this_thread::sleep_for(std::chrono::milliseconds((int)(sleepTimer->realTime * 1000)));
-                timeElapsed = timeElapsed->timeAdvance(sleepTimer);
+                timeElapsed->timeAdvance(sleepTimer);
 
                 processStep(coin, timeSincePreviousEvent, timeAdvance, timeElapsed);
             }
@@ -84,11 +91,11 @@ public:
         //let the internal clock expire if needed
         if (model->timeAdvance()->realTime != model->getMaxTimeAdvance()) {
             std::this_thread::sleep_for(std::chrono::milliseconds((int)(model->timeAdvance()->realTime) * 1000));
-            timeElapsed = timeElapsed->timeAdvance(model->timeAdvance());
+            timeElapsed->timeAdvance(model->timeAdvance());
             printf("internal\n");
-            printf("Real Time: %f Output %s\n", timeElapsed->realTime, model->lambda().c_str());
+            printf("Real Time: %.2f Output %s\n", timeElapsed->realTime, model->lambda().c_str());
             model->internalTransition();
-            printf("%s\n", model->toString().c_str());
+            model->print();
         }
 
         delete timeSincePreviousEvent;
@@ -104,33 +111,34 @@ public:
                 if (timeSinceLastInput->greaterThan(timeAdvance)) {
                 // execute internal transition
                 printf("internal\n");
-                printf("Real Time: %f\n", realTime->realTime); 
+                printf("Real Time: %.2f\n", realTime->realTime); 
                 printf("Output: %s\n" , model->lambda().c_str());
                 model->internalTransition();
 
             } else if (timeAdvance->greaterThan(timeSinceLastInput)) {
                 // execute external transition
-                printf("external");
-                printf("Real Time: %f\nInput: %s", realTime->realTime, coin.c_str());
+                printf("external\n");
+                printf("Real Time: %.2f Input: %s\n", realTime->realTime, coin.c_str());
                 model->externalTransition(coin);
 
             } else {
                 // They must be equal! confluent case
-                printf("confluent");
-                printf("Real Time: %f Input: %s",realTime->realTime, coin.c_str());
-                printf("Output: %s", model->lambda().c_str());
+                printf("confluent\n");
+                printf("Real Time: %.2f Input: %s\n",realTime->realTime, coin.c_str());
+                printf("Output: %s\n", model->lambda().c_str());
                 model->confluentTransition(coin);
             }
-            printf("%s\n", model->toString().c_str());
+            model->print();
 
             timeAdvance = model->timeAdvance();
 
             while (timeAdvance->realTime == 0) {
                 // Whatever model needs to do if timeadvance is 0 --- does not happen in this current project
-                timeAdvance = timeAdvance->timeAdvance(MIN_INCREMENT); //advance by minimum increment instead
-                printf("Time: %s" , timeAdvance->toString().c_str());
-                printf("Output: %s", model->lambda().c_str());
+                timeAdvance->timeAdvance(MIN_INCREMENT); //advance by minimum increment instead
+                printf("Time: %s\n" , timeAdvance->toString().c_str());
+                printf("Output: %s\n", model->lambda().c_str());
                 model->internalTransition();
+                delete timeAdvance;
                 timeAdvance = model->timeAdvance();
             }
     }

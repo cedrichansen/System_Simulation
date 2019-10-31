@@ -17,7 +17,7 @@ public:
     virtual void confluentTransition(std::string input) = 0 ;
     virtual Time *timeAdvance() = 0;
     virtual double getMaxTimeAdvance() = 0;
-    virtual std::string toString() {};
+    virtual void print() {};
     virtual ~Model() {}
 };
 

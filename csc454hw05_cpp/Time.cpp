@@ -20,6 +20,19 @@ class Time {
         discreteTime = 0;
     }
 
+    void changeTime(double r, int d) {
+        setReal(r);
+        setDiscrete(d);
+    }
+
+    void setReal(double r) {
+        realTime = r;
+    }
+
+    void setDiscrete(int d) {
+        discreteTime =d;
+    }
+
     bool equals(Time * o) {
         return realTime == o->realTime;
     }
@@ -28,11 +41,13 @@ class Time {
         return 51 ^ (int)realTime >> 31 * discreteTime;
     }
 
-    Time * timeAdvance(Time * advanceBy) {
+    void timeAdvance(Time * advanceBy) {
         if (equals(advanceBy)) {
-            return new Time(realTime, discreteTime + advanceBy->discreteTime);
+            realTime = roundDouble(realTime);
+            discreteTime = discreteTime + advanceBy->discreteTime;
         } else {
-            return new Time(round(realTime + advanceBy->realTime), 0);
+            realTime = roundDouble(realTime + advanceBy->realTime); 
+            discreteTime = 0;
         }
     }
 

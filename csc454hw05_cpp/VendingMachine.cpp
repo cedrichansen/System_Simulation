@@ -31,6 +31,7 @@ public:
         quarters = q;
         nickels = n;
         dimes = d;
+        customerValue = 0;
     }
 
     std::string lambda()
@@ -199,9 +200,9 @@ public:
         return DBL_MAX;
     }
 
-    std::string toString()
+    void print()
     {
-        return "Balance: $" + to_string((float)customerValue / (float)100);
+        printf("Balance: $ %.2f\n\n", (float)customerValue / (float)100);
     }
 
     ~VendingMachine (){
