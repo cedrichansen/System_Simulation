@@ -15,6 +15,7 @@ public class Network extends Model {
         this.in = inputs;
         this.out = out;
         children = new HashMap<>();
+        prevKnownTime = new Time(0,0);
     }
 
     void addChild(Model m, String name) {
@@ -33,13 +34,12 @@ public class Network extends Model {
     }
 
     void addEventsToPriorityQueue(Time totalElapsed) {
+        Time timeSinceLastInput = new Time(totalElapsed.realTime - prevKnownTime.realTime, 0);
         prevKnownTime = totalElapsed;
         for (Entry<String, Model> model : children.entrySet()) {
 
             //remove whatever we had previously for the model, because it likely needs to be recalculated
             //this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
-
-            Time modelAdvance = model.getValue().timeAdvance();
 
             if (model.getValue().canPerformExternalTransition()) {
                 //someone gave me something! need to add an external transition
@@ -47,9 +47,13 @@ public class Network extends Model {
                 events.add(e);
             }
 
+            model.getValue().modifyInternalClock(timeSinceLastInput);
+
             //add the new internal transition if we need to
+            Time modelAdvance = model.getValue().timeAdvance();
             Event e;
             if (modelAdvance.realTime != model.getValue().getMaxTimeAdvance()) {
+                //TODO: update the internal clock of the model with the time that we know about...
                 e = new Event(model.getValue() ,prevKnownTime.timeAdvance(modelAdvance), "internal", model.getKey(), "");
                 events.add(e);
             }
@@ -112,6 +116,11 @@ public class Network extends Model {
             }
         }
         return false;
+
+    }
+
+    @Override
+    public void modifyInternalClock(Time sinceLastInput) {
 
     }
 }

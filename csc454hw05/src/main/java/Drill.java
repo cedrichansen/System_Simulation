@@ -13,6 +13,7 @@ public class Drill extends Model {
         this.numberOfInputs = 1;
         prevKnownTime = new Time(0,0);
         this.out = out;
+        prevKnownTime = new Time(0,0);
     }
 
     public String lambda() {
@@ -26,7 +27,6 @@ public class Drill extends Model {
         if (numberOfPartsToProcess > 0) {
             numberOfPartsToProcess += partsAdded;
             timeRemainingOnPiece -= elapsedTime.realTime;
-
         } else {
             if (partsAdded == null) {
                 numberOfPartsToProcess = 0;
@@ -80,6 +80,13 @@ public class Drill extends Model {
         }
         return false;
 
+    }
+
+    @Override
+    public void modifyInternalClock(Time sinceLastInput) {
+        if (numberOfPartsToProcess > 0) {
+            timeRemainingOnPiece -= sinceLastInput.realTime;
+        }
     }
 
 

@@ -11,8 +11,6 @@ public class EventQueue {
         }
     }
 
-
-
     public Event remove(){
         if (events.size() != 0) {
             return events.remove(0);

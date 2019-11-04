@@ -26,6 +26,8 @@ public abstract class Model {
 
     public abstract boolean canPerformExternalTransition();
 
+    public abstract void modifyInternalClock(Time sinceLastInput);
+
 
 
 
