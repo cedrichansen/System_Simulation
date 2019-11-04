@@ -32,15 +32,14 @@ public class Network extends Model {
         }
     }
 
-    void addEventsToPriorityQueue(Time t) {
-        prevKnownTime = t;
+    void addEventsToPriorityQueue(Time totalElapsed) {
+        prevKnownTime = totalElapsed;
         for (Entry<String, Model> model : children.entrySet()) {
 
             //remove whatever we had previously for the model, because it likely needs to be recalculated
-            this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
+            //this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
 
             Time modelAdvance = model.getValue().timeAdvance();
-
 
             if (model.getValue().canPerformExternalTransition()) {
                 //someone gave me something! need to add an external transition

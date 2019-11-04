@@ -40,7 +40,7 @@ public class Drill extends Model {
     public void internalTransition() {
         this.numberOfPartsToProcess--;
         this.timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
-        parent.passPipeValues(); //tell the parent that something happend
+        parent.passPipeValues(); //tell the parent that something happened
     }
 
     public void confluentTransition(Time elapsedTime, String in) {

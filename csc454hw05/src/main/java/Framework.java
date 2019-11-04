@@ -29,14 +29,21 @@ public class Framework {
 
         while(network.events.peek() != null) {
 
+            while (network.events.peek().time.equals(timeElapsed)) {
+                //multiple events happened at the exact same time! Need to perform both
+                Event e = network.events.remove();
+                e.executeEvent(timeSincePreviousEvent);
+                network.passPipeValues();
+                System.out.println();
+            }
+
             network.addEventsToPriorityQueue(timeElapsed);
 
             Event nextEvent = network.events.remove();
 
             previousEventTime = timeElapsed;
             timeElapsed = nextEvent.time;
-            timeSincePreviousEvent = new Time(timeElapsed.realTime - previousEventTime.realTime, 0);
-
+            timeSincePreviousEvent = new Time(timeElapsed.realTime - previousEventTime.realTime, timeElapsed.discreteTime-previousEventTime.discreteTime > 0 ? timeElapsed.discreteTime-previousEventTime.discreteTime : 0);
 
             nextEvent.executeEvent(timeSincePreviousEvent);
             network.passPipeValues();

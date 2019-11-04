@@ -5,9 +5,13 @@ public class EventQueue {
     ArrayList<Event> events = new ArrayList<Event>();
 
     public void add(Event e) {
-        events.add(e);
-        Collections.sort(events);
+        if (!contains(e)) {
+            events.add(e);
+            Collections.sort(events);
+        }
     }
+
+
 
     public Event remove(){
         if (events.size() != 0) {
@@ -21,6 +25,16 @@ public class EventQueue {
             return events.get(0);
         }
         return null;
+    }
+
+    public boolean contains(Event e) {
+        for (int i = 0; i<this.events.size(); i++) {
+            Event ev = events.get(i);
+            if (e.isSameEventAs(ev)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     
