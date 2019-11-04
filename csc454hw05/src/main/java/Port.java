@@ -1,9 +1,9 @@
-public class Port{
+public class Port<T>{
 
-    int currentValue;
+    T currentValue;
 
     public Port() {
-        currentValue = 0;
+        currentValue = null;
     }
 
 }

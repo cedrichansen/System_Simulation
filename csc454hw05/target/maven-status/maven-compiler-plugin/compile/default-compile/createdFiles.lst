@@ -1,9 +1,9 @@
 Network.class
+EventQueue.class
 Main.class
 Event.class
 Framework.class
 Time.class
-PriorityQueue.class
 Port.class
 Press.class
 Model.class
