@@ -37,7 +37,7 @@ public class Network extends Model {
         for (Entry<String, Model> model : children.entrySet()) {
 
             //remove whatever we had previously for the model, because it likely needs to be recalculated
-            model.getValue().parent.events.removeEventsForModel(model.getValue(), model.getKey());
+            this.events = model.getValue().parent.events.removeEventsForModel(model.getValue(), model.getKey());
 
             //add the new event back in
             Time modelAdvance = model.getValue().timeAdvance();

@@ -24,14 +24,13 @@ public class EventQueue {
     }
 
     
-    public void removeEventsForModel(Model m, String modelName){
+    public EventQueue removeEventsForModel(Model m, String modelName){
+        EventQueue updatedEvents = new EventQueue();
         for (Event e : events) {
-            if (e.model == m) {
-                events.remove(e);
-            }
-            if (e.modelName.equals(modelName)) {
-                events.remove(e);
+            if (!e.modelName.equals(modelName)) {
+                updatedEvents.add(e);
             }
         }
+        return updatedEvents;
     }
 }
