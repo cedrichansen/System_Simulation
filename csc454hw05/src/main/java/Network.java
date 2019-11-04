@@ -39,7 +39,7 @@ public class Network extends Model {
         for (Entry<String, Model> model : children.entrySet()) {
 
             //remove whatever we had previously for the model, because it likely needs to be recalculated
-            //this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
+            this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
 
             if (model.getValue().canPerformExternalTransition()) {
                 //someone gave me something! need to add an external transition
@@ -47,15 +47,16 @@ public class Network extends Model {
                 events.add(e);
             }
 
-            model.getValue().modifyInternalClock(timeSinceLastInput);
 
             //add the new internal transition if we need to
             Time modelAdvance = model.getValue().timeAdvance();
             Event e;
             if (modelAdvance.realTime != model.getValue().getMaxTimeAdvance()) {
                 //TODO: update the internal clock of the model with the time that we know about...
-                e = new Event(model.getValue() ,prevKnownTime.timeAdvance(modelAdvance), "internal", model.getKey(), "");
+                Time eventTime = (new Time(prevKnownTime.realTime, 0)).timeAdvance(modelAdvance);
+                e = new Event(model.getValue(), eventTime, "internal", model.getKey(), "");
                 events.add(e);
+                model.getValue().modifyInternalClock(timeSinceLastInput);
             }
         }
     }
