@@ -25,7 +25,7 @@ public class Press extends Model{
         this.in[0].currentValue = 0;
         if (numberOfPartsToProcess > 0) {
             numberOfPartsToProcess += partsAdded;
-            timeRemainingOnPiece -= (elapsedTime.realTime - prevKnownTime.realTime);
+            timeRemainingOnPiece -= elapsedTime.realTime;
         } else {
             if (partsAdded == null) {
                 numberOfPartsToProcess = 0;
@@ -39,7 +39,6 @@ public class Press extends Model{
     public void internalTransition() {
         this.numberOfPartsToProcess--;
         this.timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
-        this.out.currentValue += 1;
         parent.passPipeValues(); //tell the parent that something happend
     }
 
@@ -63,6 +62,20 @@ public class Press extends Model{
     @Override
     public String toString() {
         return "Press- Number of parts: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
+    }
+
+    @Override
+    public boolean canPerformExternalTransition() {
+        for (int i=0; i<in.length; i++) {
+
+            if (in[i].currentValue != null) {
+                if (in[i].currentValue != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
     }
 
 }

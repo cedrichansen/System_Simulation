@@ -27,8 +27,7 @@ public class Time implements Comparable<Time> {
 
     @Override
     public int hashCode() {
-     //   return Double.valueOf(realTime).hashCode() ^ Integer.valueOf(discreteTime).hashCode();
-     return Objects.hash(realTime, discreteTime);
+        return Objects.hash(realTime, discreteTime);
     }
 
     public boolean greaterThan(Time o) {

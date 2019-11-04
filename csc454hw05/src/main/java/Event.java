@@ -5,6 +5,7 @@ public class Event implements Comparable<Event> {
     Time time;
     String modelName;
     String input;
+    Time timeSinceLastEvent;
 
     Event(Model m, Time t, String a, String modelName, String input) {
         model = m;
@@ -24,7 +25,7 @@ public class Event implements Comparable<Event> {
         return this.time.toString() + " " + this.model.toString() + " action: " + action + " input: " + input;
     }
 
-    public void executeEvent(Time elapsedTime) {
+    public void executeEvent(Time elapsedTimeSincePrevEvent) {
 
         System.out.println("Executing event: "  + this.toString());
 
@@ -32,10 +33,10 @@ public class Event implements Comparable<Event> {
             System.out.println(model.lambda());
             model.internalTransition();
         } else if (this.action.equals("external")) {
-            model.externalTransition(elapsedTime, input);
+            model.externalTransition(elapsedTimeSincePrevEvent, input);
         } else if (this.action.equals("confluent")) {
             System.out.println(model.lambda());
-            model.confluentTransition(elapsedTime, input);
+            model.confluentTransition(elapsedTimeSincePrevEvent, input);
         }
 
     }

@@ -1,7 +1,7 @@
 public abstract class Model {
    
     Network parent;
-    Port [] in;
+    Port<Integer> [] in;
     Port out;
     int numberOfInputs;
     Time prevKnownTime;
@@ -23,6 +23,9 @@ public abstract class Model {
     public abstract double getMaxTimeAdvance();
 
     public abstract String toString();
+
+    public abstract boolean canPerformExternalTransition();
+
 
 
 

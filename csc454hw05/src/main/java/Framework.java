@@ -6,12 +6,16 @@ public class Framework {
     ArrayList<String[]> trajectory;
 
     Time timeElapsed;
+    Time timeSincePreviousEvent;
+    Time previousEventTime;
 
 
     public Framework(Network m, ArrayList<String[]> trajectory) {
         this.network = m;
         this.trajectory = trajectory;
         timeElapsed = new Time(0, 0);
+        timeSincePreviousEvent = new Time(0,0);
+        previousEventTime = new Time(0,0);
     }
 
 
@@ -23,20 +27,25 @@ public class Framework {
         }
 
 
-        while(!network.events.peek().action.equals("nothing")) {
+        while(network.events.peek() != null) {
 
             network.addEventsToPriorityQueue(timeElapsed);
 
             Event nextEvent = network.events.remove();
-            //System.out.println("Advancing to: " + nextEvent.time);
 
+            previousEventTime = timeElapsed;
             timeElapsed = nextEvent.time;
+            timeSincePreviousEvent = new Time(timeElapsed.realTime - previousEventTime.realTime, 0);
 
-            nextEvent.executeEvent(timeElapsed);
+
+            nextEvent.executeEvent(timeSincePreviousEvent);
             network.passPipeValues();
             System.out.println();
 
         }
+
+        //TODO need to finish up the last of the internal transitions
+
 
         System.out.println("\n\nSimulation complete");
     }

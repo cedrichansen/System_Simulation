@@ -39,15 +39,21 @@ public class Network extends Model {
             //remove whatever we had previously for the model, because it likely needs to be recalculated
             this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
 
-            //add the new event back in
             Time modelAdvance = model.getValue().timeAdvance();
-            Event e;
-            if (modelAdvance.realTime == model.getValue().getMaxTimeAdvance()) {
-                e = new Event(model.getValue(), prevKnownTime.timeAdvance(modelAdvance), "nothing", model.getKey(), "");
-            } else {
-                e = new Event(model.getValue() ,prevKnownTime.timeAdvance(modelAdvance), "internal", model.getKey(), "");
+
+
+            if (model.getValue().canPerformExternalTransition()) {
+                //someone gave me something! need to add an external transition
+                Event e = new Event(model.getValue(), prevKnownTime.timeAdvance(new Time(prevKnownTime.realTime,1)), "external", model.getKey(), "");
+                events.add(e);
             }
-            events.add(e);
+
+            //add the new internal transition if we need to
+            Event e;
+            if (modelAdvance.realTime != model.getValue().getMaxTimeAdvance()) {
+                e = new Event(model.getValue() ,prevKnownTime.timeAdvance(modelAdvance), "internal", model.getKey(), "");
+                events.add(e);
+            }
         }
     }
 
@@ -94,5 +100,19 @@ public class Network extends Model {
     public String toString() {
         // TODO Auto-generated method stub
         return "Network -- events:" + this.events.events.size();
+    }
+
+    @Override
+    public boolean canPerformExternalTransition() {
+        for (int i=0; i<in.length; i++) {
+
+            if (in[i].currentValue != null) {
+                if (in[i].currentValue != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+
     }
 }

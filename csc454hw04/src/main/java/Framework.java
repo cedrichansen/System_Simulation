@@ -8,14 +8,11 @@ public class Framework {
      * Framework currently only supports one model
      */
     Model model;
-    int discreteTime;
-    final double THRESHOLD = 0.01;
     final Time MIN_INCREMENT = new Time(0, 1);
 
     public Framework(ArrayList<String[]> inputTrajectory, Model m) {
         this.inputTrajectory = inputTrajectory;
         this.model = m;
-        discreteTime = 0;
     }
 
     public void start() throws InterruptedException {
