@@ -21,10 +21,12 @@ public class Event implements Comparable<Event> {
 
     @Override
     public String toString() {
-        return this.time.toString() + " " + this.model.toString() + " " + action;
+        return this.time.toString() + " " + this.model.toString() + " action: " + action + " input: " + input;
     }
 
     public void executeEvent(Time elapsedTime) {
+
+        System.out.println("Executing event: "  + this.toString());
 
         if (this.action.equals("internal")) {
             System.out.println(model.lambda());

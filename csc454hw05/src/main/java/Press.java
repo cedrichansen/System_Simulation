@@ -62,7 +62,7 @@ public class Press extends Model{
 
     @Override
     public String toString() {
-        return "Press- Number of part: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
+        return "Press- Number of parts: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
     }
 
 }

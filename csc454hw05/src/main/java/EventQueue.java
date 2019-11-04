@@ -24,7 +24,7 @@ public class EventQueue {
     }
 
     
-    public EventQueue removeEventsForModel(Model m, String modelName){
+    public EventQueue updateEventsForModel(Model m, String modelName){
         EventQueue updatedEvents = new EventQueue();
         for (Event e : events) {
             if (!e.modelName.equals(modelName)) {

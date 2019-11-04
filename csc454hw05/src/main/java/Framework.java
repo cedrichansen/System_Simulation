@@ -5,15 +5,12 @@ public class Framework {
     Network network;
     ArrayList<String[]> trajectory;
 
-
     Time timeElapsed;
-    Time timeAdvance;
 
 
     public Framework(Network m, ArrayList<String[]> trajectory) {
         this.network = m;
         this.trajectory = trajectory;
-
         timeElapsed = new Time(0, 0);
     }
 
@@ -31,13 +28,13 @@ public class Framework {
             network.addEventsToPriorityQueue(timeElapsed);
 
             Event nextEvent = network.events.remove();
-            timeAdvance = nextEvent.time;
+            //System.out.println("Advancing to: " + nextEvent.time);
 
-            System.out.println("Advancing to: " + (timeAdvance.realTime + timeElapsed.realTime));
-
-            timeElapsed = timeElapsed.timeAdvance(timeAdvance);
+            timeElapsed = nextEvent.time;
 
             nextEvent.executeEvent(timeElapsed);
+            network.passPipeValues();
+            System.out.println();
 
         }
 

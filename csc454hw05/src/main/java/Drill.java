@@ -63,7 +63,7 @@ public class Drill extends Model {
 
     @Override
     public String toString() {
-        return "Drill- Number of part: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
+        return "Drill- Number of parts: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
     }
 
 

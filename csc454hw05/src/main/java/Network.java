@@ -37,7 +37,7 @@ public class Network extends Model {
         for (Entry<String, Model> model : children.entrySet()) {
 
             //remove whatever we had previously for the model, because it likely needs to be recalculated
-            this.events = model.getValue().parent.events.removeEventsForModel(model.getValue(), model.getKey());
+            this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
 
             //add the new event back in
             Time modelAdvance = model.getValue().timeAdvance();
@@ -93,6 +93,6 @@ public class Network extends Model {
     @Override
     public String toString() {
         // TODO Auto-generated method stub
-        return "Network -- Current event queue size: " + this.events.events.size();
+        return "Network -- events:" + this.events.events.size();
     }
 }
