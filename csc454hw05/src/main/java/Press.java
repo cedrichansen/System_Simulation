@@ -2,8 +2,6 @@ public class Press extends Model{
 
     final static int TIME_TO_PROCESS_PIECE = 1;
     double timeRemainingOnPiece;
-    Port <Integer> out;
-    Port <Integer> [] in;
 
     public Press(Port<Integer> in, Port<Integer> out){
         numberOfPartsToProcess = 0;
@@ -16,7 +14,12 @@ public class Press extends Model{
     }
 
     public String lambda() {
-        out.currentValue += 1;
+        if (this.out.currentValue != null) {
+            this.out.currentValue += 1;
+        } else {
+            this.out.currentValue = 1;
+        }
+
         return "Press finished one part!";
     }
 
@@ -25,12 +28,18 @@ public class Press extends Model{
         this.in[0].currentValue = 0;
         if (numberOfPartsToProcess > 0) {
             numberOfPartsToProcess += partsAdded;
-            timeRemainingOnPiece -= elapsedTime.realTime;
+            //timeRemainingOnPiece -= elapsedTime.realTime;
         } else {
             if (partsAdded == null) {
-                numberOfPartsToProcess = 0;
+                numberOfPartsToProcess = Integer.parseInt(in);
+                timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
             } else {
-                numberOfPartsToProcess += partsAdded;
+                if (partsAdded != 0) {
+                    numberOfPartsToProcess += partsAdded;
+                } else {
+                    numberOfPartsToProcess = Integer.parseInt(in);
+                }
+
                 timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
             }
         }
@@ -39,7 +48,7 @@ public class Press extends Model{
     public void internalTransition() {
         this.numberOfPartsToProcess--;
         this.timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
-        parent.passPipeValues(); //tell the parent that something happend
+        parent.passPipeValues();
     }
 
     public void confluentTransition(Time elapsedTime, String in) {

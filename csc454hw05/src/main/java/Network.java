@@ -50,18 +50,35 @@ public class Network extends Model {
                 Event e = new Event(other, previousEvent.time, "external", modelName, "");
                 events.add(e);
             }
-            //also create a new event for ourselves (aka, to process more parts)
-            Event ourOwnNextEvent = new Event(previousEvent.model, previousEvent.model.timeAdvance(), "internal", previousEvent.modelName, "");
-            events.add(ourOwnNextEvent);
+            //also create a new event for ourselves (aka, to process more parts), and only add it if its not the max
+             Time modelAdvance = previousEvent.model.timeAdvance();
+            if (modelAdvance.realTime != previousEvent.model.getMaxTimeAdvance()) {
+                Time eventTime = new Time(previousEvent.time.realTime + modelAdvance.realTime, 0);
+                Event ourOwnNextEvent = new Event(previousEvent.model, eventTime, "internal", previousEvent.modelName, "");
+                events.add(ourOwnNextEvent);
+            }
 
         } else if (previousEvent.action.equals("external")) {
-            //create an internal transition for ourselves
-            Event e = new Event(previousEvent.model,previousEvent.model.timeAdvance(), "internal",  previousEvent.modelName, "" );
-            events.add(e);
+             if (!hasInternalTransitionForModel(previousEvent.model)) {
+                 //create an internal transition for ourselves
+                 Time modelAdvance = previousEvent.model.timeAdvance();
+                 Time eventTime = new Time(previousEvent.time.realTime + modelAdvance.realTime, 0);
+                 Event e = new Event(previousEvent.model, eventTime, "internal",  previousEvent.modelName, "" );
+                 events.add(e);
+             }
         }
 
        return events;
 
+   }
+
+   boolean hasInternalTransitionForModel(Model m) {
+       for (Event e : events.events) {
+            if (e.model == m && e.action.equals("internal")) {
+                return true;
+            }
+       }
+       return false;
    }
 
     String getModelName(Model m) {
@@ -84,10 +101,11 @@ public class Network extends Model {
         return this.startingModel;
     }
 
-    Model findConnectedModel(Port out) {
+    Model findConnectedModel(Port o) {
         Port inPort = null;
         for (Pipe p: pipes) {
-            if (p.sending == out) {
+            Port s = p.sending;
+            if (s == o) {
                 inPort = p.receiving;
                 break;
             }

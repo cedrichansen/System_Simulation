@@ -2,8 +2,6 @@ public class Drill extends Model {
 
     final static int TIME_TO_PROCESS_PIECE = 2;
     double timeRemainingOnPiece;
-    Port <Integer> out;
-    Port <Integer> [] in;
 
     public Drill(Port<Integer> in, Port <Integer> out){
         numberOfPartsToProcess = 0;
@@ -16,7 +14,11 @@ public class Drill extends Model {
     }
 
     public String lambda() {
-        out.currentValue += 1;
+        if (this.out.currentValue != null) {
+            this.out.currentValue += 1;
+        } else {
+            this.out.currentValue = 1;
+        }
         return "Drill finished one part!";
     }
 
@@ -25,7 +27,7 @@ public class Drill extends Model {
         this.in[0].currentValue = 0;
         if (numberOfPartsToProcess > 0) {
             numberOfPartsToProcess += partsAdded;
-            timeRemainingOnPiece -= elapsedTime.realTime;
+            //timeRemainingOnPiece -= elapsedTime.realTime;
         } else {
             if (partsAdded == null) {
                 numberOfPartsToProcess = 0;

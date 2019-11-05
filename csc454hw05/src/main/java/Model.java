@@ -2,7 +2,7 @@ public abstract class Model {
    
     Network parent;
     Port<Integer> [] in;
-    Port out;
+    Port<Integer> out;
     int numberOfInputs;
     Time prevKnownTime;
     int numberOfPartsToProcess;
