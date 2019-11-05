@@ -43,7 +43,7 @@ public class Framework {
             timeElapsed = nextEvent.time;
             timeSincePreviousEvent = new Time(timeElapsed.realTime - previousEventTime.realTime, timeElapsed.discreteTime-previousEventTime.discreteTime > 0 ? timeElapsed.discreteTime-previousEventTime.discreteTime : 0);
 
-            network.createConfluentEvent();
+            network.events.events = network.createConfluentEvent();
         }
 
 

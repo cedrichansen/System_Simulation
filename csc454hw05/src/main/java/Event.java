@@ -34,7 +34,7 @@ public class Event implements Comparable<Event> {
         } else if (this.action.equals("external")) {
             model.externalTransition(elapsedTimeSincePrevEvent, input);
         } else if (this.action.equals("confluent")) {
-            System.out.println(model.lambda());
+            System.out.println(this.time.toString() + " " + model.lambda());
             model.confluentTransition(elapsedTimeSincePrevEvent, input);
         }
 
