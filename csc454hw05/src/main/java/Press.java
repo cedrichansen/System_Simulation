@@ -1,7 +1,6 @@
 public class Press extends Model{
 
     final static int TIME_TO_PROCESS_PIECE = 1;
-    int numberOfPartsToProcess;
     double timeRemainingOnPiece;
     Port <Integer> out;
     Port <Integer> [] in;

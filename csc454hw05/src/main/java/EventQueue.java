@@ -39,7 +39,7 @@ public class EventQueue {
     public EventQueue updateEventsForModel(Model m, String modelName){
         EventQueue updatedEvents = new EventQueue();
         for (Event e : events) {
-            if (!e.modelName.equals(modelName) || e.action.equals("external")) {
+            if (!e.modelName.equals(modelName) || e.action.equals("external") || e.action.equals("internal")) {
                 updatedEvents.add(e);
             }
         }

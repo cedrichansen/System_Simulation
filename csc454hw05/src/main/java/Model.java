@@ -5,6 +5,7 @@ public abstract class Model {
     Port out;
     int numberOfInputs;
     Time prevKnownTime;
+    int numberOfPartsToProcess;
 
     public void addParent (Network n) {
         parent = n;

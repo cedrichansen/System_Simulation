@@ -43,21 +43,22 @@ public class Network extends Model {
 
             if (model.getValue().canPerformExternalTransition()) {
                 //someone gave me something! need to add an external transition
-                Event e = new Event(model.getValue(), prevKnownTime.timeAdvance(new Time(prevKnownTime.realTime,1)), "external", model.getKey(), "");
+                Event e = new Event(model.getValue(), prevKnownTime.timeAdvance(new Time(prevKnownTime.realTime,prevKnownTime.discreteTime+1)), "external", model.getKey(), "");
                 events.add(e);
+            } else {
+                //add the new internal transition if we need to
+                Time modelAdvance = model.getValue().timeAdvance();
+                Event e;
+                if (modelAdvance.realTime != model.getValue().getMaxTimeAdvance()) {
+                    Time eventTime = new Time(modelAdvance.realTime + prevKnownTime.realTime, 0);
+                    e = new Event(model.getValue(), eventTime, "internal", model.getKey(), "");
+                    events.add(e);
+                    //model.getValue().modifyInternalClock(timeSinceLastInput);
+                }
             }
 
 
-            //add the new internal transition if we need to
-            Time modelAdvance = model.getValue().timeAdvance();
-            Event e;
-            if (modelAdvance.realTime != model.getValue().getMaxTimeAdvance()) {
-                //TODO: update the internal clock of the model with the time that we know about...
-                Time eventTime = (new Time(prevKnownTime.realTime, 0)).timeAdvance(modelAdvance);
-                e = new Event(model.getValue(), eventTime, "internal", model.getKey(), "");
-                events.add(e);
-                model.getValue().modifyInternalClock(timeSinceLastInput);
-            }
+
         }
     }
 
@@ -123,5 +124,14 @@ public class Network extends Model {
     @Override
     public void modifyInternalClock(Time sinceLastInput) {
 
+    }
+
+    public boolean isDone() {
+        for (Entry<String, Model> model : children.entrySet()) {
+            if (model.getValue().numberOfPartsToProcess != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

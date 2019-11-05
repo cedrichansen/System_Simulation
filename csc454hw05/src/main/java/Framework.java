@@ -27,14 +27,16 @@ public class Framework {
         }
 
 
-        while(network.events.peek() != null) {
+        while(!network.isDone() || network.events.peek() != null) {
 
-            while (network.events.peek().time.equals(timeElapsed)) {
-                //multiple events happened at the exact same time! Need to perform both
-                Event e = network.events.remove();
-                e.executeEvent(timeSincePreviousEvent);
-                network.passPipeValues();
-                System.out.println();
+            if (network.events.peek() != null) {
+                while (network.events.peek().time.equals(timeElapsed)) {
+                    //multiple events happened at the exact same time! Need to perform both
+                    Event e = network.events.remove();
+                    e.executeEvent(timeSincePreviousEvent);
+                    network.passPipeValues();
+                    System.out.println();
+                }
             }
 
             network.addEventsToPriorityQueue(timeElapsed);
@@ -50,8 +52,6 @@ public class Framework {
             System.out.println();
 
         }
-
-        //TODO need to finish up the last of the internal transitions
 
 
         System.out.println("\n\nSimulation complete");
