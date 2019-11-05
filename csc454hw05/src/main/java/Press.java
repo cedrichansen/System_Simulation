@@ -28,7 +28,7 @@ public class Press extends Model{
         this.in[0].currentValue = 0;
         if (numberOfPartsToProcess > 0) {
             numberOfPartsToProcess += partsAdded;
-            //timeRemainingOnPiece -= elapsedTime.realTime;
+            timeRemainingOnPiece -= elapsedTime.realTime;
         } else {
             if (partsAdded == null) {
                 numberOfPartsToProcess = Integer.parseInt(in);

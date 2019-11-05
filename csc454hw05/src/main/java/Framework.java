@@ -32,7 +32,7 @@ public class Framework {
         while(!network.isDone() || network.events.peek() != null) {
 
             Event nextEvent = network.events.remove();
-            nextEvent.executeEvent(timeSincePreviousEvent);
+            nextEvent.executeEvent(timeElapsed);
             network.passPipeValues();
 
             ArrayList<Event> generatedEvents = network.generateEvents(nextEvent);

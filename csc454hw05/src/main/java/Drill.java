@@ -11,6 +11,7 @@ public class Drill extends Model {
         prevKnownTime = new Time(0,0);
         this.out = out;
         prevKnownTime = new Time(0,0);
+        this.lastKnownTime = new Time(0,0);
     }
 
     public String lambda() {
@@ -27,7 +28,9 @@ public class Drill extends Model {
         this.in[0].currentValue = 0;
         if (numberOfPartsToProcess > 0) {
             numberOfPartsToProcess += partsAdded;
-            //timeRemainingOnPiece -= elapsedTime.realTime;
+            if (!con) {
+                timeRemainingOnPiece -= elapsedTime.realTime - lastKnownTime.realTime;
+            }
         } else {
             if (partsAdded == null) {
                 numberOfPartsToProcess = 0;
@@ -36,6 +39,7 @@ public class Drill extends Model {
                 timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
             }
         }
+        this.lastKnownTime = elapsedTime;
     }
 
     public void internalTransition() {

@@ -120,13 +120,15 @@ public class Network extends Model {
             }
         }
         if (previousEvent.action.equals("external") || previousEvent.action.equals("confluent")) {
-            if (!hasInternalTransitionForModel(previousEvent.model)) {
-                //create an internal transition for ourselves
-                Time modelAdvance = previousEvent.model.timeAdvance();
-                Time eventTime = new Time(previousEvent.time.realTime + modelAdvance.realTime, 0);
-                Event e = new Event(previousEvent.model, eventTime, "internal", previousEvent.modelName, "");
-                events.add(e);
+            //remove the old internal event.. It may no longer be correct
+            if (hasInternalTransitionForModel(previousEvent.model)) {
+                this.events.events = removeInternalEvent(previousEvent.model);
             }
+            //Create a new internal event. It may or may not create the same event that was just deleted
+            Time modelAdvance = previousEvent.model.timeAdvance();
+            Time eventTime = new Time(previousEvent.time.realTime + modelAdvance.realTime, 0);
+            Event e = new Event(previousEvent.model, eventTime, "internal", previousEvent.modelName, "");
+            events.add(e);
         }
 
         return events;
@@ -139,6 +141,16 @@ public class Network extends Model {
             }
         }
         return false;
+    }
+
+    ArrayList<Event> removeInternalEvent(Model m) {
+        ArrayList<Event> updatedEvs = new ArrayList<>();
+        for (Event e : events.events) {
+            if (!(e.model == m && e.action.equals("internal"))) {
+                updatedEvs.add(e);
+            }
+        }
+        return updatedEvs;
     }
 
     String getModelName(Model m) {

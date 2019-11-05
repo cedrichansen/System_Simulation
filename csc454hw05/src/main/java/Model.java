@@ -6,6 +6,8 @@ public abstract class Model {
     int numberOfInputs;
     Time prevKnownTime;
     int numberOfPartsToProcess;
+    Time lastKnownTime;
+    boolean con;
 
     public void addParent (Network n) {
         parent = n;
