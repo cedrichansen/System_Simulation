@@ -19,7 +19,7 @@ public class Framework {
     }
 
 
-    void start() throws InterruptedException {
+    void start() {
 
         /** add all of the events which are read from the input trajectory*/
         for (int i = 0; i<trajectory.size(); i++) {
@@ -43,6 +43,7 @@ public class Framework {
             timeElapsed = nextEvent.time;
             timeSincePreviousEvent = new Time(timeElapsed.realTime - previousEventTime.realTime, timeElapsed.discreteTime-previousEventTime.discreteTime > 0 ? timeElapsed.discreteTime-previousEventTime.discreteTime : 0);
 
+            network.createConfluentEvent();
         }
 
 

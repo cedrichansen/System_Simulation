@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,9 +35,54 @@ public class Network extends Model {
         }
     }
 
-    void addEventsToPriorityQueue(Time totalElapsed) {
+    /**creates confluent events, and adds it to list, and also deletes the required internal and external events*/
+    void createConfluentEvent(){
+        ArrayList<Event> eventsAtTheSameTime = new ArrayList<>();
+        Time prev = new Time(0,0);
+        for (Event e : events.events) {
+            if (e.time.realTime == prev.realTime && e.time.discreteTime == prev.discreteTime) {
+                //check to see if the list of events with us have same model. try to make a confluent event
+                for (Event possibleConfluentEv : eventsAtTheSameTime) {
+                    if (possibleConfluentEv.modelName.equals(e.modelName)) {
+                        if (possibleConfluentEv.action.equals("external") && e.action.equals("internal") ||possibleConfluentEv.action.equals("internal") && e.action.equals("external") ) {
+                            Event confluentEvent = new Event(e.model, e.time, "confluent", e.modelName, "");
+                            this.events.add(confluentEvent);
+                            this.events.events = this.removeInternalAndExternals(confluentEvent);
+                            return;
+                        }
+                    }
+                }
 
+            } else {
+                eventsAtTheSameTime = getEventsAtTime(e.time);
+                prev = e.time;
+            }
+        }
     }
+
+    /**We added a confluent event, so remove the internal and external ones */
+    public ArrayList<Event> removeInternalAndExternals(Event confluentEv) {
+        ArrayList<Event> updatedEvents = new ArrayList<>();
+        for (Event e : events.events) {
+            if (confluentEv.modelName.equals(e.modelName) && (e.action.equals("internal") || e.action.equals("external"))){
+                //do not add it!
+            } else {
+                updatedEvents.add(e);
+            }
+        }
+        return updatedEvents;
+    }
+
+    public ArrayList<Event> getEventsAtTime(Time t) {
+        ArrayList<Event> ev = new ArrayList<>();
+        for (Event e: this.events.events) {
+            if (e.time.discreteTime == t.discreteTime && e.time.realTime == t.realTime) {
+                ev.add(e);
+            }
+        }
+        return ev;
+    }
+
 
    ArrayList<Event> generateEvents(Event previousEvent){
        ArrayList<Event> events = new ArrayList<>();
