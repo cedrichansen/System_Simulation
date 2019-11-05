@@ -164,28 +164,9 @@ public class Network extends Model {
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
         return "Network -- events:" + this.events.events.size();
     }
 
-    @Override
-    public boolean canPerformExternalTransition() {
-        for (int i=0; i<in.length; i++) {
-
-            if (in[i].currentValue != null) {
-                if (in[i].currentValue != 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-
-    }
-
-    @Override
-    public void modifyInternalClock(Time sinceLastInput) {
-
-    }
 
     public boolean isDone() {
         for (Entry<String, Model> model : children.entrySet()) {

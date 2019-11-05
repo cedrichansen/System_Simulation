@@ -73,26 +73,5 @@ public class Press extends Model{
         return "Press- Number of parts: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
     }
 
-    @Override
-    public boolean canPerformExternalTransition() {
-        for (int i=0; i<in.length; i++) {
-
-            if (in[i].currentValue != null) {
-                if (in[i].currentValue != 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-
-    }
-
-    @Override
-    public void modifyInternalClock(Time sinceLastInput) {
-        if (numberOfPartsToProcess > 0) {
-            timeRemainingOnPiece -= sinceLastInput.realTime;
-        }
-    }
-
 
 }

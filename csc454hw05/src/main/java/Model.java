@@ -25,12 +25,4 @@ public abstract class Model {
 
     public abstract String toString();
 
-    public abstract boolean canPerformExternalTransition();
-
-    public abstract void modifyInternalClock(Time sinceLastInput);
-
-
-
-
-
 }
