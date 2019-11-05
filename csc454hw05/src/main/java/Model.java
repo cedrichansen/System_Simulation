@@ -2,10 +2,12 @@ public abstract class Model {
    
     Network parent;
     Port<Integer> [] in;
-    Port out;
+    Port<Integer> out;
     int numberOfInputs;
     Time prevKnownTime;
     int numberOfPartsToProcess;
+    Time lastKnownTime;
+    boolean con;
 
     public void addParent (Network n) {
         parent = n;
@@ -24,13 +26,5 @@ public abstract class Model {
     public abstract double getMaxTimeAdvance();
 
     public abstract String toString();
-
-    public abstract boolean canPerformExternalTransition();
-
-    public abstract void modifyInternalClock(Time sinceLastInput);
-
-
-
-
 
 }

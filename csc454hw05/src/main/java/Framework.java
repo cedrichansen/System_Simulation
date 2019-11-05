@@ -19,38 +19,31 @@ public class Framework {
     }
 
 
-    void start() throws InterruptedException {
+    void start() {
 
         /** add all of the events which are read from the input trajectory*/
         for (int i = 0; i<trajectory.size(); i++) {
-            network.events.add(new Event(network, new Time(Double.parseDouble(trajectory.get(i)[0]) + timeElapsed.realTime, 0), "external", "network",trajectory.get(i)[1] ));
+            Model startingPoint = network.findStartingPoint();
+            String startingModelName = network.getModelName(startingPoint);
+            network.events.add(new Event(startingPoint, new Time(Double.parseDouble(trajectory.get(i)[0]) + timeElapsed.realTime, 0), "external", startingModelName,trajectory.get(i)[1] ));
         }
 
 
         while(!network.isDone() || network.events.peek() != null) {
 
-            if (network.events.peek() != null) {
-                while (network.events.peek().time.equals(timeElapsed)) {
-                    //multiple events happened at the exact same time! Need to perform both
-                    Event e = network.events.remove();
-                    e.executeEvent(timeSincePreviousEvent);
-                    network.passPipeValues();
-                    System.out.println();
-                }
-            }
-
-            network.addEventsToPriorityQueue(timeElapsed);
-
             Event nextEvent = network.events.remove();
+            nextEvent.executeEvent(timeElapsed);
+            network.passPipeValues();
 
+            ArrayList<Event> generatedEvents = network.generateEvents(nextEvent);
+            for (Event e : generatedEvents) {
+                network.events.add(e);
+            }
             previousEventTime = timeElapsed;
             timeElapsed = nextEvent.time;
             timeSincePreviousEvent = new Time(timeElapsed.realTime - previousEventTime.realTime, timeElapsed.discreteTime-previousEventTime.discreteTime > 0 ? timeElapsed.discreteTime-previousEventTime.discreteTime : 0);
 
-            nextEvent.executeEvent(timeSincePreviousEvent);
-            network.passPipeValues();
-            System.out.println();
-
+            network.events.events = network.createConfluentEvent();
         }
 
 

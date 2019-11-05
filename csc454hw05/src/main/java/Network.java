@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,14 +9,15 @@ public class Network extends Model {
     Map<String, Model> children;
     EventQueue events = new EventQueue();
     ArrayList<Pipe> pipes = new ArrayList<Pipe>();
-    Port <Integer> [] in;
-    Port <Integer> out;
+    Port<Integer>[] in;
+    Port<Integer> out;
+    Model startingModel;
 
     public Network(Port<Integer>[] inputs, Port<Integer> out) {
         this.in = inputs;
         this.out = out;
         children = new HashMap<>();
-        prevKnownTime = new Time(0,0);
+        prevKnownTime = new Time(0, 0);
     }
 
     void addChild(Model m, String name) {
@@ -33,33 +35,164 @@ public class Network extends Model {
         }
     }
 
-    void addEventsToPriorityQueue(Time totalElapsed) {
-        Time timeSinceLastInput = new Time(totalElapsed.realTime - prevKnownTime.realTime, 0);
-        prevKnownTime = totalElapsed;
-        for (Entry<String, Model> model : children.entrySet()) {
+    /**
+     * creates confluent events, and adds it to list, and also deletes the required internal and external events
+     */
+    ArrayList<Event> createConfluentEvent() {
+        ArrayList<Event> eventsAtTheSameTime = new ArrayList<>();
+        Time prev = new Time(0, 0);
 
-            //remove whatever we had previously for the model, because it likely needs to be recalculated
-            this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
+        for (Event e : events.events) {
+            if (e.time.realTime == prev.realTime && e.time.discreteTime == prev.discreteTime) {
+                //check to see if the list of events with us have same model. try to make a confluent event
+                for (Event possibleConfluentEv : eventsAtTheSameTime) {
+                    if (possibleConfluentEv.modelName.equals(e.modelName)) {
+                        if (possibleConfluentEv.action.equals("external") && e.action.equals("internal") || possibleConfluentEv.action.equals("internal") && e.action.equals("external")) {
+                            String in;
+                            if (!possibleConfluentEv.input.equals("")) {
+                                in = possibleConfluentEv.input;
+                            } else {
+                                in = e.input;
+                            }
+                            Event confluentEvent = new Event(e.model, e.time, "confluent", e.modelName, in);
+                            this.events.add(confluentEvent);
+                            return removeInternalAndExternals(confluentEvent);
+                        }
+                    }
+                }
 
-            if (model.getValue().canPerformExternalTransition()) {
-                //someone gave me something! need to add an external transition
-                Event e = new Event(model.getValue(), prevKnownTime.timeAdvance(new Time(prevKnownTime.realTime,prevKnownTime.discreteTime+1)), "external", model.getKey(), "");
-                events.add(e);
             } else {
-                //add the new internal transition if we need to
-                Time modelAdvance = model.getValue().timeAdvance();
-                Event e;
-                if (modelAdvance.realTime != model.getValue().getMaxTimeAdvance()) {
-                    Time eventTime = new Time(modelAdvance.realTime + prevKnownTime.realTime, 0);
-                    e = new Event(model.getValue(), eventTime, "internal", model.getKey(), "");
-                    events.add(e);
-                    //model.getValue().modifyInternalClock(timeSinceLastInput);
+                eventsAtTheSameTime = getEventsAtTime(e.time);
+                prev = e.time;
+            }
+        }
+        return this.events.events;
+    }
+
+    /**
+     * We added a confluent event, so remove the internal and external ones
+     */
+    public ArrayList<Event> removeInternalAndExternals(Event confluentEv) {
+        ArrayList<Event> updatedEvents = new ArrayList<>();
+        for (Event e : events.events) {
+            if (confluentEv.modelName.equals(e.modelName) && (confluentEv.time.realTime == e.time.realTime && confluentEv.time.discreteTime == e.time.discreteTime)) {
+                if ((e.action.equals("internal") || e.action.equals("external"))) {
+                    //we dont add these
+                } else {
+                    updatedEvents.add(e);
+                }
+            } else {
+                updatedEvents.add(e);
+            }
+        }
+        return updatedEvents;
+    }
+
+    public ArrayList<Event> getEventsAtTime(Time t) {
+        ArrayList<Event> ev = new ArrayList<>();
+        for (Event e : this.events.events) {
+            if (e.time.discreteTime == t.discreteTime && e.time.realTime == t.realTime) {
+                ev.add(e);
+            }
+        }
+        return ev;
+    }
+
+
+    ArrayList<Event> generateEvents(Event previousEvent) {
+        ArrayList<Event> events = new ArrayList<>();
+
+        if (previousEvent.action.equals("internal") || previousEvent.action.equals("confluent")) {
+
+            //we will create an external event for whatever is connected to its pipe
+            Model other = findConnectedModel(previousEvent.model.out);
+            String modelName = getModelName(other);
+            if (other != null) {
+                Event e = new Event(other, previousEvent.time, "external", modelName, "");
+                events.add(e);
+            }
+            //also create a new event for ourselves (aka, to process more parts), and only add it if its not the max
+            Time modelAdvance = previousEvent.model.timeAdvance();
+            if (modelAdvance.realTime != previousEvent.model.getMaxTimeAdvance()) {
+                Time eventTime = new Time(previousEvent.time.realTime + modelAdvance.realTime, 0);
+                Event ourOwnNextEvent = new Event(previousEvent.model, eventTime, "internal", previousEvent.modelName, "");
+                events.add(ourOwnNextEvent);
+            }
+        }
+        if (previousEvent.action.equals("external") || previousEvent.action.equals("confluent")) {
+            //remove the old internal event.. It may no longer be correct
+            if (hasInternalTransitionForModel(previousEvent.model)) {
+                this.events.events = removeInternalEvent(previousEvent.model);
+            }
+            //Create a new internal event. It may or may not create the same event that was just deleted
+            Time modelAdvance = previousEvent.model.timeAdvance();
+            Time eventTime = new Time(previousEvent.time.realTime + modelAdvance.realTime, 0);
+            Event e = new Event(previousEvent.model, eventTime, "internal", previousEvent.modelName, "");
+            events.add(e);
+        }
+
+        return events;
+    }
+
+    boolean hasInternalTransitionForModel(Model m) {
+        for (Event e : events.events) {
+            if (e.model == m && e.action.equals("internal")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    ArrayList<Event> removeInternalEvent(Model m) {
+        ArrayList<Event> updatedEvs = new ArrayList<>();
+        for (Event e : events.events) {
+            if (!(e.model == m && e.action.equals("internal"))) {
+                updatedEvs.add(e);
+            }
+        }
+        return updatedEvs;
+    }
+
+    String getModelName(Model m) {
+        for (Entry<String, Model> model : children.entrySet()) {
+            if (model.getValue() == m) {
+                return model.getKey();
+            }
+        }
+        return "";
+    }
+
+    Model findStartingPoint() {
+//        Port in = this.in[0];
+//        for (Entry<String, Model> model : children.entrySet()) {
+//            if (model.getValue().in[0] == in) {
+//                return model.getValue();
+//            }
+//        }
+//        return null;
+        return this.startingModel;
+    }
+
+    Model findConnectedModel(Port o) {
+        Port inPort = null;
+        for (Pipe p : pipes) {
+            Port s = p.sending;
+            if (s == o) {
+                inPort = p.receiving;
+                break;
+            }
+        }
+
+        if (inPort != null) {
+            for (Entry<String, Model> model : children.entrySet()) {
+                for (Port p : model.getValue().in) {
+                    if (p == inPort) {
+                        return model.getValue();
+                    }
                 }
             }
-
-
-
         }
+        return null;
     }
 
 
@@ -77,7 +210,7 @@ public class Network extends Model {
         passPipeValues();
 
         for (Entry<String, Model> model : children.entrySet()) {
-           model.getValue().externalTransition(inputTime, in);
+            model.getValue().externalTransition(inputTime, in);
         }
     }
 
@@ -103,28 +236,9 @@ public class Network extends Model {
 
     @Override
     public String toString() {
-        // TODO Auto-generated method stub
         return "Network -- events:" + this.events.events.size();
     }
 
-    @Override
-    public boolean canPerformExternalTransition() {
-        for (int i=0; i<in.length; i++) {
-
-            if (in[i].currentValue != null) {
-                if (in[i].currentValue != 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-
-    }
-
-    @Override
-    public void modifyInternalClock(Time sinceLastInput) {
-
-    }
 
     public boolean isDone() {
         for (Entry<String, Model> model : children.entrySet()) {

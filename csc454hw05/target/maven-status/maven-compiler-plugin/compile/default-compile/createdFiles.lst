@@ -1,11 +1,11 @@
 Network.class
-EventQueue.class
 Main.class
+EventQueue.class
 Event.class
-Framework.class
 Time.class
+Framework.class
 Port.class
 Press.class
-Model.class
 Pipe.class
+Model.class
 Drill.class

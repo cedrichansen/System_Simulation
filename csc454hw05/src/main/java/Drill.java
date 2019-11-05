@@ -2,8 +2,6 @@ public class Drill extends Model {
 
     final static int TIME_TO_PROCESS_PIECE = 2;
     double timeRemainingOnPiece;
-    Port <Integer> out;
-    Port <Integer> [] in;
 
     public Drill(Port<Integer> in, Port <Integer> out){
         numberOfPartsToProcess = 0;
@@ -13,10 +11,15 @@ public class Drill extends Model {
         prevKnownTime = new Time(0,0);
         this.out = out;
         prevKnownTime = new Time(0,0);
+        this.lastKnownTime = new Time(0,0);
     }
 
     public String lambda() {
-        out.currentValue += 1;
+        if (this.out.currentValue != null) {
+            this.out.currentValue += 1;
+        } else {
+            this.out.currentValue = 1;
+        }
         return "Drill finished one part!";
     }
 
@@ -25,7 +28,9 @@ public class Drill extends Model {
         this.in[0].currentValue = 0;
         if (numberOfPartsToProcess > 0) {
             numberOfPartsToProcess += partsAdded;
-            timeRemainingOnPiece -= elapsedTime.realTime;
+            if (!con) {
+                timeRemainingOnPiece -= elapsedTime.realTime - lastKnownTime.realTime;
+            }
         } else {
             if (partsAdded == null) {
                 numberOfPartsToProcess = 0;
@@ -34,6 +39,7 @@ public class Drill extends Model {
                 timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
             }
         }
+        this.lastKnownTime = elapsedTime;
     }
 
     public void internalTransition() {
@@ -66,27 +72,5 @@ public class Drill extends Model {
     public String toString() {
         return "Drill- Number of parts: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
     }
-
-    @Override
-    public boolean canPerformExternalTransition() {
-        for (int i=0; i<in.length; i++) {
-
-            if (in[i].currentValue != null) {
-                if (in[i].currentValue != 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-
-    }
-
-    @Override
-    public void modifyInternalClock(Time sinceLastInput) {
-        if (numberOfPartsToProcess > 0) {
-            timeRemainingOnPiece -= sinceLastInput.realTime;
-        }
-    }
-
 
 }
