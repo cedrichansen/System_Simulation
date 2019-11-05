@@ -10,6 +10,7 @@ public class Network extends Model {
     ArrayList<Pipe> pipes = new ArrayList<Pipe>();
     Port <Integer> [] in;
     Port <Integer> out;
+    Model startingModel;
 
     public Network(Port<Integer>[] inputs, Port<Integer> out) {
         this.in = inputs;
@@ -34,32 +35,74 @@ public class Network extends Model {
     }
 
     void addEventsToPriorityQueue(Time totalElapsed) {
-        Time timeSinceLastInput = new Time(totalElapsed.realTime - prevKnownTime.realTime, 0);
-        prevKnownTime = totalElapsed;
-        for (Entry<String, Model> model : children.entrySet()) {
 
-            //remove whatever we had previously for the model, because it likely needs to be recalculated
-            this.events = model.getValue().parent.events.updateEventsForModel(model.getValue(), model.getKey());
+    }
 
-            if (model.getValue().canPerformExternalTransition()) {
-                //someone gave me something! need to add an external transition
-                Event e = new Event(model.getValue(), prevKnownTime.timeAdvance(new Time(prevKnownTime.realTime,prevKnownTime.discreteTime+1)), "external", model.getKey(), "");
+   ArrayList<Event> generateEvents(Event previousEvent){
+       ArrayList<Event> events = new ArrayList<>();
+
+         if (previousEvent.action.equals("internal")) {
+
+            //we will create an external event for whatever is connected to its pipe
+            Model other = findConnectedModel(previousEvent.model.out);
+            String modelName = getModelName(other);
+            if (other != null) {
+                Event e = new Event(other, previousEvent.time, "external", modelName, "");
                 events.add(e);
-            } else {
-                //add the new internal transition if we need to
-                Time modelAdvance = model.getValue().timeAdvance();
-                Event e;
-                if (modelAdvance.realTime != model.getValue().getMaxTimeAdvance()) {
-                    Time eventTime = new Time(modelAdvance.realTime + prevKnownTime.realTime, 0);
-                    e = new Event(model.getValue(), eventTime, "internal", model.getKey(), "");
-                    events.add(e);
-                    //model.getValue().modifyInternalClock(timeSinceLastInput);
-                }
             }
+            //also create a new event for ourselves (aka, to process more parts)
+            Event ourOwnNextEvent = new Event(previousEvent.model, previousEvent.model.timeAdvance(), "internal", previousEvent.modelName, "");
+            events.add(ourOwnNextEvent);
 
-
-
+        } else if (previousEvent.action.equals("external")) {
+            //create an internal transition for ourselves
+            Event e = new Event(previousEvent.model,previousEvent.model.timeAdvance(), "internal",  previousEvent.modelName, "" );
+            events.add(e);
         }
+
+       return events;
+
+   }
+
+    String getModelName(Model m) {
+        for (Entry<String, Model> model : children.entrySet()) {
+            if (model.getValue() == m) {
+                return model.getKey();
+            }
+        }
+        return "";
+    }
+
+    Model findStartingPoint() {
+//        Port in = this.in[0];
+//        for (Entry<String, Model> model : children.entrySet()) {
+//            if (model.getValue().in[0] == in) {
+//                return model.getValue();
+//            }
+//        }
+//        return null;
+        return this.startingModel;
+    }
+
+    Model findConnectedModel(Port out) {
+        Port inPort = null;
+        for (Pipe p: pipes) {
+            if (p.sending == out) {
+                inPort = p.receiving;
+                break;
+            }
+        }
+
+        if (inPort != null) {
+          for (Entry<String, Model> model : children.entrySet())  {
+              for (Port p : model.getValue().in) {
+                  if (p == inPort) {
+                      return model.getValue();
+                  }
+              }
+          }
+        }
+        return null;
     }
 
 

@@ -6,14 +6,11 @@ import java.util.Scanner;
 public class Main {
     public static void main (String [] args) throws FileNotFoundException, InterruptedException {
         
-        Port<Integer> netInPort = new Port<Integer>();
-        Port [] netIn = {netInPort};
-        Port<Integer> netOut = new Port<Integer>();
-        Network network = new Network(netIn, netOut);
 
         Port<Integer> pressInPort = new Port<Integer>();
-        Pipe p1 = new Pipe(netInPort, pressInPort);
-        
+
+        Port [] netIn = {pressInPort};
+
         Port<Integer> pressOutPort = new Port<Integer>();
         Port <Integer>drillInPort = new Port<Integer>();
 
@@ -21,17 +18,17 @@ public class Main {
 
         Port<Integer> drillOutPort = new Port<Integer>();
 
-        Pipe netOutPipe = new Pipe(drillOutPort, netOut);
-
         Press press = new Press(pressInPort, pressOutPort);
 
         Drill drill = new Drill(drillInPort, drillOutPort);
 
+        Network network = new Network(netIn, drillOutPort);
+
         network.addChild(drill, "drill");
         network.addChild(press, "press");
-        network.addPipe(p1);
         network.addPipe(p2);
-        network.addPipe(netOutPipe);
+
+        network.startingModel = press;
 
         Framework f = new Framework(network, getInputTrajectory("trajectory.txt"));
         f.start();
