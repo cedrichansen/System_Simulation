@@ -37,7 +37,25 @@ public class Main {
         /****** FOR HW03 MODELS *****/
 
         //TODO: Initialize ports for XOR model to -1
+        Port<Integer> xor1in1 = new Port<Integer>(-1);
+        Port<Integer> xor1in2 = new Port<Integer> (-1);
+        Port[] xor1ins = {xor1in1, xor1in2};
+        Port<Integer> xor1out = new Port<Integer>(-1);
+        XORModel xor1 = new XORModel(xor1ins, xor1out);
 
+
+
+        Port<Integer> xor2in1 = new Port<Integer>(-1);
+        Port<Integer> xor2in2 = new Port<Integer> (-1);
+        Port[] xor2ins = {xor2in1, xor2in2};
+        Port <Integer> xor2out = new Port<Integer>(-1);
+        XORModel xor2 = new XORModel(xor2ins, xor2out);
+
+
+        Port<Integer> mmIn = new Port<Integer>(-1);
+        Port<Integer> mmOut = new Port<Integer>(-1);
+        Port [] mmInArr = {mmIn};
+        MemoryModel mm = new MemoryModel(mmInArr, mmOut);
 
 
     }
