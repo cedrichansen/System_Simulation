@@ -14,7 +14,7 @@ public class Main {
         Port<Integer> pressOutPort = new Port<>(0);
         Port <Integer>drillInPort = new Port<>(0);
 
-        Pipe p2 = new Pipe(pressOutPort, drillInPort);
+        Pipe<Integer> p2 = new Pipe<>(pressOutPort, drillInPort);
 
         Port<Integer> drillOutPort = new Port<>(0);
 
@@ -22,7 +22,7 @@ public class Main {
 
         Drill drill = new Drill(drillInPort, drillOutPort);
 
-        Network network = new Network(netIn, drillOutPort);
+        Network <Integer, Integer> network = new Network<>(netIn, drillOutPort);
 
         network.addChild(drill, "drill");
         network.addChild(press, "press");

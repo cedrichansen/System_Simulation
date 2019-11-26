@@ -3,7 +3,7 @@ public class Pipe <T> {
     Port<T> sending;
     Port<T> receiving;
 
-    public Pipe(Port<T> outgoingPort, Port<T>receivingPort) {
+    public Pipe(Port<T> outgoingPort, Port<T> receivingPort) {
         this.sending = outgoingPort;
         this.receiving = receivingPort;
     }

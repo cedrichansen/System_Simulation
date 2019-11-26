@@ -2,7 +2,7 @@ public abstract class Model<IN,OUT> {
    
     Network parent;
 
-    Port<IN> [] in;
+    Port<IN>[] in;
     Port<OUT> out;
 
     int numberOfInputs;
