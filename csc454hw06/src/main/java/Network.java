@@ -130,30 +130,55 @@ public class Network<IN, OUT> {
         Event next = this.events.remove();
         this.events.insert(next);
         ArrayList<Event> eventsAtTheSameTime = getEventsAtTime(next.time);
+        ArrayList<Event> modifiedEvents = new ArrayList<>();
 
-        for (Entry<String, Model> model : children.entrySet()) {
-            boolean hasExternalTrans = false;
-            boolean hasInternalTrans = true;
+        Event e = eventsAtTheSameTime.remove(0);
+        Event n = eventsAtTheSameTime.get(0);
 
-            for (Event e : eventsAtTheSameTime) {
-                if (e.model == model.getValue()) {
-                    if (e.action.equals("internal")) {
-                        hasInternalTrans = true;
-                    } else if (e.action.equals("external")) {
-                        hasExternalTrans = true;
+        while (next != null) {
+            if (e.modelName.equals(n.modelName)) {
+                //previous model is the same
+                String a1 = e.action;
+                String a2 = n.action;
+
+                if ((a1.equals("internal") && a2.equals("external")) || a1.equals("external") && a2.equals("external")) {
+                    //we have a confluent event, so remove the current next event
+                    String in;
+                    if (!e.input.equals("")) {
+                        in = e.input;
+                    } else {
+                        in = n.input;
                     }
+
+                    eventsAtTheSameTime.remove(0);
+                    Event con = new Event(e.model, e.time, "confluent", e.modelName, in);
+                    modifiedEvents.add(con);
+
+                } else {
+                    //add the original events
+                    modifiedEvents.add(e);
                 }
+
+            } else {
+                modifiedEvents.add(e);
             }
 
-            if (hasExternalTrans && hasInternalTrans) {
-                //we need to remove them and add a confluent event instead
-            }
+            e = eventsAtTheSameTime.remove(0);
+            next = eventsAtTheSameTime.get(0);
         }
 
+        return modifiedEvents;
+    }
 
-
-
-
+    EventQueue removeInternalEvent(Model m) {
+        EventQueue validEvents = new EventQueue(this.events.pQueue.length);
+        for (int i =0; i<this.events.getNumberOfElements(); i++) {
+            Event e = this.events.pQueue[i];
+            if (!(e.model == m && e.action.equals("internal"))) {
+                validEvents.insert(e);
+            }
+        }
+        return validEvents;
     }
 
     ArrayList<Event> getEventsAtTime(Time t) {
@@ -168,17 +193,6 @@ public class Network<IN, OUT> {
     }
 
 
-
-    EventQueue removeInternalEvent(Model m) {
-        EventQueue validEvents = new EventQueue(this.events.pQueue.length);
-        for (int i =0; i<this.events.getNumberOfElements(); i++) {
-            Event e = this.events.pQueue[i];
-            if (!(e.model == m && e.action.equals("internal"))) {
-                validEvents.insert(e);
-            }
-        }
-        return validEvents;
-    }
 
 
     @Override

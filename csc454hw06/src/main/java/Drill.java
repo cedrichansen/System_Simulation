@@ -1,9 +1,9 @@
-public class Press extends Model<Integer, Integer> {
+public class Drill extends Model<Integer, Integer>{
 
-    final static int TIME_TO_PROCESS_PIECE = 1;
+    final static int TIME_TO_PROCESS_PIECE = 2;
     double timeRemainingOnPiece;
 
-    public Press(Port<Integer> in, Port<Integer> out){
+    public Drill(Port<Integer> in, Port<Integer> out){
         numberOfPartsToProcess = 0;
         this.numberOfInputs = 1;
         this.in = new Port[numberOfInputs];
@@ -14,7 +14,7 @@ public class Press extends Model<Integer, Integer> {
 
     public String lambda() {
         this.out.currentValue = (int)this.out.currentValue + 1;
-        return "Press finished one part!";
+        return "Drill finished one part!";
     }
 
     public void externalTransition(Time currentTime, String in) {
@@ -25,7 +25,6 @@ public class Press extends Model<Integer, Integer> {
         numberOfPartsToProcess += partsAdded;
 
         if (numberOfPartsToProcess > 0) {
-            //we received a piece, but we are already working on one.. decrement time appropriately
             Time elapsed = new Time(currentTime.realTime - lastKnownTime.realTime, 0);
             timeRemainingOnPiece -= elapsed.realTime;
         } else {

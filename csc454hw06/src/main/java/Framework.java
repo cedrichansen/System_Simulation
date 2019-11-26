@@ -42,7 +42,7 @@ public class Framework {
             }
 
             ArrayList<Event> updatedEvs = network.createConfluentEvent();
-            network.events = new EventQueue(network.events.pQueue.length);
+            network.events = new EventQueue(updatedEvs.size());
             for (Event e : updatedEvs) {
                 network.events.insert(e);
             }
