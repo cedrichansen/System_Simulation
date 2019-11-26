@@ -41,13 +41,18 @@ public class Framework {
                 network.events.insert(e);
             }
 
-            ArrayList<Event> updatedEvs = network.createConfluentEvent();
-            network.events = new EventQueue(updatedEvs.size() + network.events.getNumberOfElements());
-            for (Event e : updatedEvs) {
-                network.events.insert(e);
+            if (network.events.getNumberOfElements() > 0) {
+                ArrayList<Event> updatedEvs = network.createConfluentEvent();
+                network.events = new EventQueue(updatedEvs.size() + network.events.getNumberOfElements());
+                for (Event e : updatedEvs) {
+                    network.events.insert(e);
+                }
+
+                nextEvent = network.events.remove();
+            } else {
+                nextEvent = null;
             }
 
-            nextEvent = network.events.remove();
         }
 
 

@@ -137,7 +137,7 @@ public class Network<IN, OUT> {
         if (eventsAtTheSameTime.size() != 0) {
             n = eventsAtTheSameTime.get(0);
         } else {
-            n = null;
+            n = null; //we only have one event, so just skip to the end...
         }
 
         while (n != null) {

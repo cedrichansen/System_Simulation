@@ -1,6 +1,6 @@
 public class Drill extends Model<Integer, Integer> {
 
-    final static int TIME_TO_PROCESS_PIECE = 1;
+    final static int TIME_TO_PROCESS_PIECE = 2;
     double timeRemainingOnPiece;
 
     public Drill(Port<Integer> in, Port<Integer> out){
@@ -13,7 +13,7 @@ public class Drill extends Model<Integer, Integer> {
     }
 
     public String lambda() {
-        this.out.currentValue = (int)this.out.currentValue + 1;
+        this.out.currentValue = 1;
         return "Drill finished one part!";
     }
 

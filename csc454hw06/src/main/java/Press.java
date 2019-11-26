@@ -13,7 +13,7 @@ public class Press extends Model<Integer, Integer> {
     }
 
     public String lambda() {
-        this.out.currentValue = (int)this.out.currentValue + 1;
+        this.out.currentValue = 1;
         return "Press finished one part!";
     }
 
