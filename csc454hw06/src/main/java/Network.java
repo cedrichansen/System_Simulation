@@ -107,7 +107,7 @@ public class Network<IN, OUT> {
                 events.add(ourOwnNextEvent);
             }
         }
-        if (event.action.equals("external") || event.action.equals("confluent")) {
+        if (event.action.equals("external")) {
             //remove the old internal event.. It may no longer be correct
             this.events = removeInternalEvent(event.model);
 
@@ -133,7 +133,12 @@ public class Network<IN, OUT> {
         ArrayList<Event> modifiedEvents = new ArrayList<>();
 
         Event e = eventsAtTheSameTime.remove(0);
-        Event n = eventsAtTheSameTime.get(0);
+        Event n;
+        if (eventsAtTheSameTime.size() != 0) {
+            n = eventsAtTheSameTime.get(0);
+        } else {
+            n = null;
+        }
 
         while (n != null) {
             if (e.modelName.equals(n.modelName)) {
