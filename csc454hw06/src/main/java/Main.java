@@ -5,7 +5,8 @@ import java.util.Scanner;
 
 public class Main {
     public static void main (String [] args) throws FileNotFoundException, InterruptedException {
-        
+
+        /****** FOR HW05 ***/
 
         Port<Integer> pressInPort = new Port<>(0);
 
@@ -30,6 +31,14 @@ public class Main {
 
         Framework f = new Framework(network, getInputTrajectory("trajectory.txt"));
         f.start();
+
+
+
+        /****** FOR HW03 MODELS *****/
+
+        //TODO: Initialize ports for XOR model to -1
+
+
 
     }
 
