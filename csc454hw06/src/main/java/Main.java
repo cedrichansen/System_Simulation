@@ -18,15 +18,15 @@ public class Main {
 
         Port<Integer> drillOutPort = new Port<>(0);
 
-        //Press press = new Press(pressInPort, pressOutPort);
+        Press press = new Press(pressInPort, pressOutPort);
 
         //Drill drill = new Drill(drillInPort, drillOutPort);
 
-        Network network = new Network(netIn, drillOutPort);
+        Network network = new Network(netIn, pressOutPort);
 
 //        network.addChild(drill, "drill");
-//        network.addChild(press, "press");
-          network.addPipe(p2);
+        network.addChild(press, "press");
+//          network.addPipe(p2);
 
 
 

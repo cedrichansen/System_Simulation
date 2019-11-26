@@ -6,7 +6,7 @@ public abstract class Model<IN,OUT> {
     Port<OUT> out;
 
     int numberOfInputs;
-    Time timeRemainingOnCurrentPiece;
+    Time lastKnownTime;
     int numberOfPartsToProcess;
 
     public void addParent (Network n) {

@@ -5,17 +5,13 @@ public class Framework {
     Network network;
     ArrayList<Trajectory> trajectory;
 
-    Time timeElapsed;
-    Time timeSincePreviousEvent;
-    Time previousEventTime;
+    Time currentTime;
 
 
     public Framework(Network m, ArrayList<Trajectory> trajectory) {
         this.network = m;
         this.trajectory = trajectory;
-        timeElapsed = new Time(0, 0);
-        timeSincePreviousEvent = new Time(0, 0);
-        previousEventTime = new Time(0, 0);
+       currentTime = new Time(0,0);
     }
 
 
@@ -32,22 +28,26 @@ public class Framework {
             }
         }
 
+        Event nextEvent = network.events.remove();
 
-        while (!network.isDone() || network.events.getNumberOfElements() != 0) {
+        while (nextEvent != null) {
 
-            Event nextEvent = network.events.remove();
-            nextEvent.executeEvent(timeElapsed);
-            network.passPipeValues();
+            currentTime = nextEvent.time; //advance time
+            nextEvent.executeEvent(currentTime); //execute event
+            network.passPipeValues(); //pass values around
 
-            //ArrayList<Event> generatedEvents = network.generateEvents(nextEvent);
-//            for (Event e : generatedEvents) {
-//                network.events.add(e);
-//            }
-            previousEventTime = timeElapsed;
-            timeElapsed = nextEvent.time;
-            timeSincePreviousEvent = new Time(timeElapsed.realTime - previousEventTime.realTime, timeElapsed.discreteTime - previousEventTime.discreteTime > 0 ? timeElapsed.discreteTime - previousEventTime.discreteTime : 0);
+            ArrayList<Event> generatedEvents = network.generateEvents(nextEvent);
+            for (Event e : generatedEvents) {
+                network.events.insert(e);
+            }
 
-            //network.events.events = network.createConfluentEvent();
+            ArrayList<Event> updatedEvs = network.createConfluentEvent();
+            network.events = new EventQueue(network.events.pQueue.length);
+            for (Event e : updatedEvs) {
+                network.events.insert(e);
+            }
+
+            nextEvent = network.events.remove();
         }
 
 

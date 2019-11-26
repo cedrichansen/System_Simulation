@@ -7,12 +7,13 @@ public class EventQueue  {
         pQueue = new Event[capacity];
     }
 
-    public void insert(Event item ){
+    public boolean insert(Event item ){
         if(index == pQueue.length){
-            return;
+            return false;
         }
         pQueue[index] = item;
         index++;
+        return true;
     }
 
     public int getNumberOfElements(){
@@ -23,15 +24,15 @@ public class EventQueue  {
         if(index == 0){
             return null;
         }
-        int maxIndex = 0;
+        int minIndex = 0;
         for (int i=1; i<index; i++) {
-            if (pQueue[i].compareTo(pQueue[maxIndex]) > 0) {
-                maxIndex = i;
+            if (pQueue[i].compareTo(pQueue[minIndex]) < 0) {
+                minIndex = i;
             }
         }
-        Event result = pQueue[maxIndex];
+        Event result = pQueue[minIndex];
         index--;
-        pQueue[maxIndex] = pQueue[index];
+        pQueue[minIndex] = pQueue[index];
         return result;
     }
 }
