@@ -20,15 +20,13 @@ public class Main {
 
         Press press = new Press(pressInPort, pressOutPort);
 
-        //Drill drill = new Drill(drillInPort, drillOutPort);
+        Drill drill = new Drill(drillInPort, drillOutPort);
 
-        Network network = new Network(netIn, pressOutPort);
+        Network network = new Network(netIn, drillOutPort);
 
-//        network.addChild(drill, "drill");
+        network.addChild(drill, "drill");
         network.addChild(press, "press");
-//          network.addPipe(p2);
-
-
+        network.addPipe(p2);
 
         Framework f = new Framework(network, getInputTrajectory("trajectory.txt"));
         f.start();

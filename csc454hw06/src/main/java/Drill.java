@@ -1,6 +1,6 @@
-public class Drill extends Model<Integer, Integer>{
+public class Drill extends Model<Integer, Integer> {
 
-    final static int TIME_TO_PROCESS_PIECE = 2;
+    final static int TIME_TO_PROCESS_PIECE = 1;
     double timeRemainingOnPiece;
 
     public Drill(Port<Integer> in, Port<Integer> out){
@@ -18,13 +18,9 @@ public class Drill extends Model<Integer, Integer>{
     }
 
     public void externalTransition(Time currentTime, String in) {
-        Integer partsAdded = this.in[0].currentValue;
-        this.in[0].currentValue = 0;
-
-        partsAdded = partsAdded == 0 ? Integer.parseInt(in) : partsAdded; //if network input, input will come from in param rather than pipe
-        numberOfPartsToProcess += partsAdded;
 
         if (numberOfPartsToProcess > 0) {
+            //we received a piece, but we are already working on one.. decrement time appropriately
             Time elapsed = new Time(currentTime.realTime - lastKnownTime.realTime, 0);
             timeRemainingOnPiece -= elapsed.realTime;
         } else {
@@ -33,6 +29,13 @@ public class Drill extends Model<Integer, Integer>{
         }
 
         lastKnownTime = currentTime;
+
+        Integer partsAdded = this.in[0].currentValue;
+        this.in[0].currentValue = 0;
+
+        partsAdded = partsAdded == 0 ? Integer.parseInt(in) : partsAdded; //if network input, input will come from in param rather than pipe
+        numberOfPartsToProcess += partsAdded;
+
     }
 
     public void internalTransition() {
@@ -40,9 +43,10 @@ public class Drill extends Model<Integer, Integer>{
         this.timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
     }
 
-    public void confluentTransition(Time elapsedTime, String in) {
+    public void confluentTransition(Time currentTime, String in) {
         internalTransition();
-        externalTransition(elapsedTime, in);
+        lastKnownTime = currentTime; //this is to prevent the drill from thinking it is already done another part, since internal transition reset time
+        externalTransition(currentTime, in);
     }
 
     public Time timeAdvance() {
@@ -59,7 +63,7 @@ public class Drill extends Model<Integer, Integer>{
 
     @Override
     public String toString() {
-        return "Press- Number of parts: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
+        return "Drill- Number of parts: " + numberOfPartsToProcess + " Time remaining on current part: " + timeRemainingOnPiece;
     }
 
 

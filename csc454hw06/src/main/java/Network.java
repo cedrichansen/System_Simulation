@@ -135,7 +135,7 @@ public class Network<IN, OUT> {
         Event e = eventsAtTheSameTime.remove(0);
         Event n = eventsAtTheSameTime.get(0);
 
-        while (next != null) {
+        while (n != null) {
             if (e.modelName.equals(n.modelName)) {
                 //previous model is the same
                 String a1 = e.action;
@@ -150,7 +150,7 @@ public class Network<IN, OUT> {
                         in = n.input;
                     }
 
-                    eventsAtTheSameTime.remove(0);
+                    eventsAtTheSameTime.remove(0); //remove the event that we peeked
                     Event con = new Event(e.model, e.time, "confluent", e.modelName, in);
                     modifiedEvents.add(con);
 
@@ -163,8 +163,23 @@ public class Network<IN, OUT> {
                 modifiedEvents.add(e);
             }
 
-            e = eventsAtTheSameTime.remove(0);
-            next = eventsAtTheSameTime.get(0);
+            if (eventsAtTheSameTime.size() > 1) {
+                //we are out of stuff to look at
+                e = eventsAtTheSameTime.remove(0);
+                n = eventsAtTheSameTime.get(0);
+            } else {
+                for (int i =0; i< this.events.getNumberOfElements(); i++) {
+                    if (!this.events.pQueue[i].time.equals(next.time)) { //we have already added events at this time, if valid
+                        modifiedEvents.add(this.events.pQueue[i]); // add the events that happen after
+                    }
+                }
+                return modifiedEvents;
+            }
+
+        }
+
+        for (int i =0; i< this.events.getNumberOfElements(); i++) {
+            modifiedEvents.add(this.events.pQueue[i]); // add the events that happen after
         }
 
         return modifiedEvents;
