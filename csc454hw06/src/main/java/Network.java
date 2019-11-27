@@ -183,7 +183,7 @@ public class Network<IN, OUT> {
 
         }
 
-        for (int i =0; i< this.events.getNumberOfElements(); i++) {
+        for (int i = 0; i< this.events.getNumberOfElements(); i++) {
             modifiedEvents.add(this.events.pQueue[i]); // add the events that happen after
         }
 

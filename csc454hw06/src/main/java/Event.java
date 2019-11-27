@@ -17,7 +17,11 @@ public class Event implements Comparable<Event> {
     @Override
     public int compareTo(Event e) {
         if (time.compareTo(e.time) == 0) {
-            return this.modelName.compareTo(e.modelName);
+            if (this.modelName.compareTo(e.modelName) == 0) {
+                return this.action.compareTo(e.action);
+            } else {
+                return this.modelName.compareTo(e.modelName);
+            }
         } else {
             return time.compareTo(e.time);
         }
@@ -25,7 +29,7 @@ public class Event implements Comparable<Event> {
 
     @Override
     public String toString() {
-        return this.time.toString() + " " + this.modelName+ ", action: " + action;
+        return this.time.toString() + " " + this.modelName + ", action: " + action;
     }
 
     public void executeEvent(Time currentTime) {
@@ -33,12 +37,12 @@ public class Event implements Comparable<Event> {
         //System.out.println(this.toString());
 
         if (this.action.equals("internal")) {
-            System.out.println(this.time.toString() + " " + this.modelName + ": " +  model.lambda());
+            System.out.println(this.time.toString() + " " + this.modelName + ": " + model.lambda());
             model.internalTransition();
         } else if (this.action.equals("external")) {
             model.externalTransition(currentTime, input);
         } else if (this.action.equals("confluent")) {
-            System.out.println(this.time.toString() + " " + this.modelName + ": " +  model.lambda());
+            System.out.println(this.time.toString() + " " + this.modelName + ": " + model.lambda());
             model.confluentTransition(currentTime, input);
         }
 
