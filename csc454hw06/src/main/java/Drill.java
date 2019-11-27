@@ -14,7 +14,7 @@ public class Drill extends Model<Integer, Integer> {
 
     public String lambda() {
         this.out.currentValue = 1;
-        return "Drill finished one part!";
+        return "finished one part!";
     }
 
     public void externalTransition(Time currentTime, String in) {

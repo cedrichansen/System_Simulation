@@ -19,7 +19,7 @@ public class MemoryModel extends Model <Integer, Integer> {
     @Override
     public String lambda() {
         this.out.currentValue = state[0];
-        return "MemoryModel returned: " + this.out.currentValue;
+        return this.out.currentValue.toString();
     }
 
     @Override

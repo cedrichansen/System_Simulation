@@ -3,38 +3,66 @@ public class XORModel extends Model<Integer, Integer> {
     final static int TIME_TO_PROCESS_PIECE = 1;
     double timeRemaining;
 
-    int [] state;
+    int[] state;
 
-    public XORModel(Port<Integer>[] in, Port<Integer> out){
-        this.state = new int [1];
+    public XORModel(Port<Integer>[] in, Port<Integer> out) {
+        this.state = new int[1];
         this.numberOfInputs = 2;
         this.in = new Port[numberOfInputs];
-        for (int i =0; i<numberOfInputs; i++) {
+        for (int i = 0; i < numberOfInputs; i++) {
             this.in[i] = in[i];
         }
         this.out = out;
-        lastKnownTime = new Time(0,0);
+        lastKnownTime = new Time(0, 0);
     }
 
 
     @Override
     public String lambda() {
         this.out.currentValue = state[0];
-        return "XOR returned: " + this.out.currentValue;
+        return this.out.currentValue.toString();
     }
 
     @Override
     public void externalTransition(Time elapsedTime, String in) {
 
-        Integer inp1 = this.in[0].currentValue;
-        this.in[0].currentValue = -1;
-        inp1 = inp1 < 0 ? Integer.parseInt(in.split(",")[0]) : inp1; //if network input, input will come from in param rather than pipe
+        boolean inputsAreReady = true;
+        boolean haveInput = !in.equals("");
 
-        Integer inp2 = this.in[0].currentValue;
-        this.in[0].currentValue = -1;
-        inp2 = inp2 < 0 ? Integer.parseInt(in.split(",")[1]) : inp2; //if network input, input will come from in param rather than pipe
 
-        this.state[0] = inp1 ^ inp2;
+        if (haveInput) {
+            //actually put the input somewhere
+            for (int i =0; i<numberOfInputs; i++) {
+                if (this.in[i].currentValue == -1) {
+                    //give a port the value
+                    this.in[i].currentValue = Integer.parseInt(in);
+                    break;
+                }
+            }
+        }
+
+
+        for (int i = 0; i < numberOfInputs; i++) {
+            if (this.in[i].currentValue == -1) {
+                //someone set the value
+                inputsAreReady = false;
+                break;
+            }
+        }
+
+        if (inputsAreReady) {
+            this.state[0] = this.in[0].currentValue ^ this.in[1].currentValue;
+
+            //reset inputs
+            for (int i = 0; i < numberOfInputs; i++) {
+                this.in[i].currentValue = -1;
+            }
+
+        } else {
+            System.out.println("Inputs are not ready for xor model");
+        }
+
+
     }
 
     @Override
@@ -61,6 +89,6 @@ public class XORModel extends Model<Integer, Integer> {
 
     @Override
     public String toString() {
-        return "XOR Model - state : " + state[0] ;
+        return "XOR Model - state : " + state[0];
     }
 }

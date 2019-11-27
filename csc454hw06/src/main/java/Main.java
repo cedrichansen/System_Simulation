@@ -29,9 +29,7 @@ public class Main {
         network.addChild(press, "press");
         network.addPipe(p2);
 
-        Framework f = new Framework(network, getInputTrajectory("trajectory.txt"));
-        f.start();
-
+        (new Framework(network, getInputTrajectory("trajectory.txt"))).start();
 
 
         /****** FOR HW03 MODELS *****/
@@ -57,7 +55,19 @@ public class Main {
         Port [] mmInArr = {mmIn};
         MemoryModel mm = new MemoryModel(mmInArr, mmOut);
 
+        Pipe <Integer> x1x2 = new Pipe<>(xor1out, xor2in1);
+        Pipe <Integer> mmx2 = new Pipe<>(mmOut, xor2in2);
+        Pipe <Integer> x2mm = new Pipe<>(xor2out, mmIn);
 
+        Network <Integer, Integer> XORNetwork = new Network<>(xor1ins, xor2out);
+        XORNetwork.addChild(xor1, "xor1");
+        XORNetwork.addChild(xor2, "xor2");
+        XORNetwork.addChild(mm, "mm");
+        XORNetwork.addPipe(x1x2);
+        XORNetwork.addPipe(mmx2);
+        XORNetwork.addPipe(x2mm);
+
+        (new Framework(XORNetwork, getInputTrajectory("xorTrajectory.txt"))).start();
     }
 
 

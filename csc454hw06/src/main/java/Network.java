@@ -146,7 +146,7 @@ public class Network<IN, OUT> {
                 String a1 = e.action;
                 String a2 = n.action;
 
-                if ((a1.equals("internal") && a2.equals("external")) || a1.equals("external") && a2.equals("external")) {
+                if ((a1.equals("internal") && a2.equals("external")) || a1.equals("external") && a2.equals("internal")) {
                     //we have a confluent event, so remove the current next event
                     String in;
                     if (!e.input.equals("")) {
