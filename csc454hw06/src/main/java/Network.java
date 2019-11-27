@@ -106,8 +106,7 @@ public class Network<IN, OUT> {
                 Event ourOwnNextEvent = new Event(event.model, eventTime, "internal", event.modelName, "");
                 events.add(ourOwnNextEvent);
             }
-        }
-        if (event.action.equals("external")) {
+        } else if (event.action.equals("external")) {
             //remove the old internal event.. It may no longer be correct
             this.events = removeInternalEvent(event.model);
 
@@ -125,94 +124,63 @@ public class Network<IN, OUT> {
     /**
      * creates confluent events, and adds it to list, and also deletes the required internal and external events
      */
-    ArrayList<Event> createConfluentEvent() {
+    EventQueue createConfluentEvent() {
 
-        Event next = this.events.remove();
-        this.events.insert(next);
-        ArrayList<Event> eventsAtTheSameTime = getEventsAtTime(next.time);
-        ArrayList<Event> modifiedEvents = new ArrayList<>();
+        EventQueue updatedEvents = new EventQueue(this.events.pQueue.length);
 
-        Event e = eventsAtTheSameTime.remove(0);
-        Event n;
-        if (eventsAtTheSameTime.size() != 0) {
-            n = eventsAtTheSameTime.get(0);
-        } else {
-            n = null; //we only have one event, so just skip to the end...
-        }
+        Time t = events.peek().time;
+        Event current = events.remove();
+        Event eventAfter = events.peek();
 
-        while (n != null) {
-            if (e.modelName.equals(n.modelName)) {
-                //previous model is the same
-                String a1 = e.action;
-                String a2 = n.action;
+        while (current != null) {
 
-                if ((a1.equals("internal") && a2.equals("external")) || a1.equals("external") && a2.equals("internal")) {
-                    //we have a confluent event, so remove the current next event
-                    String in;
-                    if (!e.input.equals("")) {
-                        in = e.input;
+            if (eventAfter == null) {
+                //the current event is the last event, so it can't be confluent. add it
+                updatedEvents.insert(current);
+            } else {
+                //we have *At least* 2 elements of interest, so check if confluent case
+                // Events are ordered on basis of time, modelName, and action, so we can be assured they are ordered as such
+                //we can only create confluent events for events at the next moment in time
+                if (current.time.realTime == t.realTime && current.time.discreteTime == t.discreteTime && eventAfter.time.realTime == t.realTime && eventAfter.time.discreteTime == t.discreteTime) {
+                    if (current.modelName.equals(eventAfter.modelName)) {
+                        if ((current.action.equals("internal") && eventAfter.action.equals("external")) || (current.action.equals("external") && eventAfter.action.equals("internal"))) {
+                            //we have found a confluent case
+                            events.remove(); //this will remove the eventAfter
+
+                            String input = current.input.equals("") ? eventAfter.input : current.input;
+                            Event con = new Event(current.model, current.time, "confluent", current.modelName, input);
+                            updatedEvents.insert(con);
+                        }
                     } else {
-                        in = n.input;
+                        updatedEvents.insert(current);
                     }
-
-                    eventsAtTheSameTime.remove(0); //remove the event that we peeked
-                    Event con = new Event(e.model, e.time, "confluent", e.modelName, in);
-                    modifiedEvents.add(con);
-
                 } else {
-                    //add the original events
-                    modifiedEvents.add(e);
+                    updatedEvents.insert(current);
                 }
 
-            } else {
-                modifiedEvents.add(e);
             }
 
-            if (eventsAtTheSameTime.size() > 1) {
-                //we are out of stuff to look at
-                e = eventsAtTheSameTime.remove(0);
-                n = eventsAtTheSameTime.get(0);
-            } else {
-                for (int i =0; i< this.events.getNumberOfElements(); i++) {
-                    if (!this.events.pQueue[i].time.equals(next.time)) { //we have already added events at this time, if valid
-                        modifiedEvents.add(this.events.pQueue[i]); // add the events that happen after
-                    }
-                }
-                return modifiedEvents;
-            }
-
+            //make progress on the loop... Look at each object
+            current = events.remove();
+            eventAfter = events.peek();
         }
 
-        for (int i = 0; i< this.events.getNumberOfElements(); i++) {
-            modifiedEvents.add(this.events.pQueue[i]); // add the events that happen after
-        }
+            return updatedEvents;
 
-        return modifiedEvents;
     }
 
     EventQueue removeInternalEvent(Model m) {
         EventQueue validEvents = new EventQueue(this.events.pQueue.length);
-        for (int i =0; i<this.events.getNumberOfElements(); i++) {
-            Event e = this.events.pQueue[i];
+        Event e = this.events.remove();
+
+        while (e != null) {
             if (!(e.model == m && e.action.equals("internal"))) {
                 validEvents.insert(e);
             }
+            e = this.events.remove();
         }
         return validEvents;
     }
-
-    ArrayList<Event> getEventsAtTime(Time t) {
-        ArrayList<Event> eventsAtTime = new ArrayList<>();
-        for (int i =0 ; i < this.events.getNumberOfElements(); i++) {
-            if (this.events.pQueue[i].time.realTime == t.realTime && this.events.pQueue[i].time.discreteTime == t.discreteTime) {
-                //event is at the same time
-                eventsAtTime.add(this.events.pQueue[i]);
-            }
-        }
-        return eventsAtTime;
-    }
-
-
 
 
     @Override
