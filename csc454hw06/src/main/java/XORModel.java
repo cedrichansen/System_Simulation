@@ -33,7 +33,7 @@ public class XORModel extends Model<Integer, Integer> {
         if (haveInput) {
             //actually put the input somewhere
             for (int i =0; i<numberOfInputs; i++) {
-                if (this.in[i].currentValue == -1) {
+                if (this.in[i].currentValue == null) {
                     //give a port the value
                     this.in[i].currentValue = Integer.parseInt(in);
                     break;
@@ -43,7 +43,7 @@ public class XORModel extends Model<Integer, Integer> {
 
 
         for (int i = 0; i < numberOfInputs; i++) {
-            if (this.in[i].currentValue == -1) {
+            if (this.in[i].currentValue == null) {
                 //someone set the value
                 inputsAreReady = false;
                 break;
@@ -55,7 +55,7 @@ public class XORModel extends Model<Integer, Integer> {
 
             //reset inputs
             for (int i = 0; i < numberOfInputs; i++) {
-                this.in[i].currentValue = -1;
+                this.in[i].currentValue = null;
             }
 
         } else {

@@ -25,8 +25,8 @@ public class MemoryModel extends Model <Integer, Integer> {
     @Override
     public void externalTransition(Time elapsedTime, String in) {
         Integer inp = this.in[0].currentValue;
-        this.in[0].currentValue = -1;
-        inp = inp < 0 ? Integer.parseInt(in) : inp; //if network input, input will come from in param rather than pipe
+        this.in[0].currentValue = null;
+        inp = inp == null ? Integer.parseInt(in) : inp; //if network input, input will come from in param rather than pipe
 
         int x1 = this.state[1];
         int x2 = inp;

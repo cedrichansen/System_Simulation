@@ -20,7 +20,7 @@ public class Event implements Comparable<Event> {
             if (this.modelName.compareTo(e.modelName) == 0) {
                 return this.action.compareTo(e.action);
             } else {
-                return this.modelName.compareTo(e.modelName);
+                return this.modelName.compareTo(e.modelName) * -1;
             }
         } else {
             return time.compareTo(e.time);

@@ -31,7 +31,9 @@ public class Network<IN, OUT> {
 
     void passPipeValues() {
         for (Pipe p : pipes) {
-            p.passValue();
+            if (p.sending.currentValue != null) {
+                p.passValue();
+            }
         }
     }
 

@@ -35,23 +35,23 @@ public class Main {
         /****** FOR HW03 MODELS *****/
 
         //TODO: Initialize ports for XOR model to -1
-        Port<Integer> xor1in1 = new Port<Integer>(-1);
-        Port<Integer> xor1in2 = new Port<Integer> (-1);
+        Port<Integer> xor1in1 = new Port<>(null);
+        Port<Integer> xor1in2 = new Port<> (null);
         Port[] xor1ins = {xor1in1, xor1in2};
-        Port<Integer> xor1out = new Port<Integer>(-1);
+        Port<Integer> xor1out = new Port<>(null);
         XORModel xor1 = new XORModel(xor1ins, xor1out);
 
 
 
-        Port<Integer> xor2in1 = new Port<>(-1);
-        Port<Integer> xor2in2 = new Port<> (-1);
+        Port<Integer> xor2in1 = new Port<>(null);
+        Port<Integer> xor2in2 = new Port<> (null);
         Port[] xor2ins = {xor2in1, xor2in2};
-        Port <Integer> xor2out = new Port<>(-1);
+        Port <Integer> xor2out = new Port<>(null);
         XORModel xor2 = new XORModel(xor2ins, xor2out);
 
 
-        Port<Integer> mmIn = new Port<>(-1);
-        Port<Integer> mmOut = new Port<>(-1);
+        Port<Integer> mmIn = new Port<>(null);
+        Port<Integer> mmOut = new Port<>(null);
         Port [] mmInArr = {mmIn};
         MemoryModel mm = new MemoryModel(mmInArr, mmOut);
 
@@ -67,7 +67,7 @@ public class Main {
         XORNetwork.addPipe(mmx2);
         XORNetwork.addPipe(x2mm);
 
-        (new Framework(XORNetwork, getInputTrajectory("xorTrajectory.txt"))).start();
+        (new Framework(XORNetwork, getInputTrajectory("xorTrajectory.txt"), 50)).start();
     }
 
 

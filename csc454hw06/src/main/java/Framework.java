@@ -6,14 +6,24 @@ public class Framework {
     ArrayList<Trajectory> trajectory;
 
     Time currentTime;
+    int maxNumberOfEvents;
 
 
     public Framework(Network m, ArrayList<Trajectory> trajectory) {
         this.network = m;
         this.trajectory = trajectory;
-       currentTime = new Time(0,0);
+        currentTime = new Time(0,0);
+        this.maxNumberOfEvents = Integer.MAX_VALUE;
     }
 
+
+
+    public Framework(Network m, ArrayList<Trajectory> trajectory, int maxNumberOfEvents) {
+        this.network = m;
+        this.trajectory = trajectory;
+        currentTime = new Time(0,0);
+        this.maxNumberOfEvents = maxNumberOfEvents;
+    }
 
     void start() {
 
@@ -28,9 +38,11 @@ public class Framework {
             }
         }
 
+        int eventsExecuted = 0;
+
         Event nextEvent = network.events.remove();
 
-        while (nextEvent != null) {
+        while (nextEvent != null && eventsExecuted < this.maxNumberOfEvents) {
 
             currentTime = nextEvent.time; //advance time
             executeEvent(nextEvent,currentTime); //execute event
@@ -48,6 +60,7 @@ public class Framework {
                 nextEvent = null;
             }
 
+            eventsExecuted++;
         }
 
 
