@@ -9,6 +9,8 @@ public class Framework {
     int maxNumberOfEvents;
     int numLoops;
     int networkEventsExecuted = 0;
+    int maxOutputs;
+    int outputsPrinted = 0;
 
 
     public Framework(Network m, ArrayList<Trajectory> trajectory) {
@@ -16,17 +18,19 @@ public class Framework {
         this.trajectory = trajectory;
         currentTime = new Time(0,0);
         this.maxNumberOfEvents = Integer.MAX_VALUE;
-        this.numLoops = -1;
+        this.numLoops = 1;
+        this.maxOutputs = Integer.MAX_VALUE;
     }
 
 
 
-    public Framework(Network m, ArrayList<Trajectory> trajectory, int maxNumberOfEvents, int numLoops) {
+    public Framework(Network m, ArrayList<Trajectory> trajectory, int maxNumberOfEvents, int numLoops, int maxOutputs) {
         this.network = m;
         this.trajectory = trajectory;
         currentTime = new Time(0,0);
         this.maxNumberOfEvents = maxNumberOfEvents;
         this.numLoops = numLoops;
+        this.maxOutputs =  maxOutputs;
     }
 
     void start() {
@@ -38,14 +42,16 @@ public class Framework {
                 //tell each of the input ports/models about what it will be receiving
                 Model startingPoint = network.findConnectedModel(i);
                 String startingModelName = network.getModelName(startingPoint);
-                network.events.insert(new Event(startingPoint, new Time(t.time, 0), "external", startingModelName, t.inputs[i]));
+                for (int j = 0; j<numLoops; j++) {
+                    network.events.insert(new Event(startingPoint, new Time(t.time, 0), "external", startingModelName, t.inputs[i]));
+                }
             }
         }
 
         int eventsExecuted = 0;
         Event nextEvent = network.events.remove();
 
-        while (nextEvent != null && eventsExecuted < this.maxNumberOfEvents) {
+        while (nextEvent != null && eventsExecuted < this.maxNumberOfEvents && outputsPrinted < maxOutputs) {
 
             currentTime = nextEvent.time; //advance time
             executeEvent(nextEvent,currentTime); //execute event
@@ -77,9 +83,10 @@ public class Framework {
             System.out.println(e.time.toString() + " " + e.modelName + ": " + res);
 
             if (e.model.out == this.network.out ) {
-                if (numLoops != -1) {
+                if (numLoops != 1) {
                     if ( networkEventsExecuted % numLoops == 0) {
                         System.out.println("           " + e.time.toString() + " Network: " + res);
+                        outputsPrinted++;
                     }
                 }  else {
                     System.out.println("           " + e.time.toString() + " Network: " + res);
@@ -99,9 +106,10 @@ public class Framework {
             String res = e.model.lambda();
             System.out.println(e.time.toString() + " " + e.modelName + ": " + res);
             if (e.model.out == this.network.out ) {
-                if (numLoops != -1) {
+                if (numLoops != 1) {
                     if ( networkEventsExecuted % numLoops == 0) {
                         System.out.println("           " + e.time.toString() + " Network: " + res);
+                        outputsPrinted++;
                     }
                 }  else {
                     System.out.println("           " + e.time.toString() + " Network: " + res);
