@@ -33,7 +33,7 @@ public class Framework {
         while (nextEvent != null) {
 
             currentTime = nextEvent.time; //advance time
-            nextEvent.executeEvent(currentTime); //execute event
+            executeEvent(nextEvent,currentTime); //execute event
             network.passPipeValues(); //pass values around
 
             ArrayList<Event> generatedEvents = network.generateEvents(nextEvent);
@@ -52,6 +52,28 @@ public class Framework {
 
 
         System.out.println("\n\nSimulation complete");
+    }
+
+    public void executeEvent(Event e, Time currentTime) {
+
+        if (e.action.equals("internal")) {
+            String res = e.model.lambda();
+            System.out.println(e.time.toString() + " " + e.modelName + ": " + res);
+            if (e.model.out == this.network.out) {
+                System.out.println("           " + e.time.toString() + " Network: " + res);
+            }
+            e.model.internalTransition();
+        } else if (e.action.equals("external")) {
+            e.model.externalTransition(currentTime, e.input);
+        } else if (e.action.equals("confluent")) {
+            String res = e.model.lambda();
+            System.out.println(e.time.toString() + " " + e.modelName + ": " + res);
+            if (e.model.out == this.network.out) {
+                System.out.println("           " + e.time.toString() + " Network: " + res);
+            }
+            e.model.confluentTransition(currentTime, e.input);
+        }
+
     }
 
 

@@ -32,21 +32,5 @@ public class Event implements Comparable<Event> {
         return this.time.toString() + " " + this.modelName + ", action: " + action;
     }
 
-    public void executeEvent(Time currentTime) {
-
-        //System.out.println(this.toString());
-
-        if (this.action.equals("internal")) {
-            System.out.println(this.time.toString() + " " + this.modelName + ": " + model.lambda());
-            model.internalTransition();
-        } else if (this.action.equals("external")) {
-            model.externalTransition(currentTime, input);
-        } else if (this.action.equals("confluent")) {
-            System.out.println(this.time.toString() + " " + this.modelName + ": " + model.lambda());
-            model.confluentTransition(currentTime, input);
-        }
-
-    }
-
 
 }
