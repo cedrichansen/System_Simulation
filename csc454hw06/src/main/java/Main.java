@@ -43,15 +43,15 @@ public class Main {
 
 
 
-        Port<Integer> xor2in1 = new Port<Integer>(-1);
-        Port<Integer> xor2in2 = new Port<Integer> (-1);
+        Port<Integer> xor2in1 = new Port<>(-1);
+        Port<Integer> xor2in2 = new Port<> (-1);
         Port[] xor2ins = {xor2in1, xor2in2};
-        Port <Integer> xor2out = new Port<Integer>(-1);
+        Port <Integer> xor2out = new Port<>(-1);
         XORModel xor2 = new XORModel(xor2ins, xor2out);
 
 
-        Port<Integer> mmIn = new Port<Integer>(-1);
-        Port<Integer> mmOut = new Port<Integer>(-1);
+        Port<Integer> mmIn = new Port<>(-1);
+        Port<Integer> mmOut = new Port<>(-1);
         Port [] mmInArr = {mmIn};
         MemoryModel mm = new MemoryModel(mmInArr, mmOut);
 

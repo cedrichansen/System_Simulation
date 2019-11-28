@@ -40,6 +40,7 @@ public class Press extends Model<Integer, Integer> {
 
     public void internalTransition() {
         this.numberOfPartsToProcess--;
+        this.lastKnownTime = new Time(this.lastKnownTime.realTime + timeRemainingOnPiece, 0); // we might care to know the time at which processing time was reset
         this.timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
     }
 

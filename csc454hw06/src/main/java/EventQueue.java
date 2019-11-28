@@ -16,6 +16,12 @@ public class EventQueue  {
         return true;
     }
 
+    public Event peek(){
+        Event e = remove();
+        insert(e);
+        return e;
+    }
+
     public int getNumberOfElements(){
         return index;
     }
