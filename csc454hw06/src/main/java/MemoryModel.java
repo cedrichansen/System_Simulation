@@ -36,7 +36,7 @@ public class MemoryModel extends Model <Integer, Integer> {
 
     @Override
     public void internalTransition() {
-        //not used
+        this.out.currentValue = null;
     }
 
     @Override

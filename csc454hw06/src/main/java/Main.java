@@ -67,7 +67,7 @@ public class Main {
         XORNetwork.addPipe(mmx2);
         XORNetwork.addPipe(x2mm);
 
-        (new Framework(XORNetwork, getInputTrajectory("xorTrajectory.txt"), 50)).start();
+        (new Framework(XORNetwork, getInputTrajectory("xorTrajectory.txt"), 150, 3)).start();
     }
 
 

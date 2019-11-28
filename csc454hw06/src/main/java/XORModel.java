@@ -59,7 +59,7 @@ public class XORModel extends Model<Integer, Integer> {
             }
 
         } else {
-            System.out.println("Inputs are not ready for xor model");
+            //System.out.println("Inputs are not ready for xor model");
         }
 
 
@@ -67,7 +67,7 @@ public class XORModel extends Model<Integer, Integer> {
 
     @Override
     public void internalTransition() {
-        //Not used
+        this.out.currentValue = null;
     }
 
     @Override
