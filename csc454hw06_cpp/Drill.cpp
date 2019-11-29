@@ -1,13 +1,13 @@
 #ifndef DRILL
 #define DRILL
 
-template <class Integer, Integer> class Drill : public Model<Integer, Integer> {
+template <class IN, class OUT> class Drill : public Model<IN, OUT> {
 
 public: 
-    final static int TIME_TO_PROCESS_PIECE = 2;
+    const static int TIME_TO_PROCESS_PIECE = 2;
     double timeRemainingOnPiece;
 
-    Drill(Port<Integer> in, Port<Integer> out){
+    Drill(Port<IN> * in, Port<OUT> out){
         numberOfPartsToProcess = 0;
         this.numberOfInputs = 1;
         this.in = new Port[numberOfInputs];
