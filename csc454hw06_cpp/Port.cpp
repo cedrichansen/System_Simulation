@@ -1,9 +1,11 @@
-template <class T> class Port {
+template <class T>
+class Port
+{
+public:
+    T currentValue;
 
-    T * currentValue;
-
-     Port(T * initial) {
+    Port(T initial)
+    {
         currentValue = initial;
     }
-
 };

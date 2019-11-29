@@ -1,11 +1,16 @@
-import java.util.ArrayList;
+#ifndef FRAMEWORK
+#define FRAMEWORK
 
-public class Framework {
 
-    Network network;
-    ArrayList<Trajectory> trajectory;
+#include <vector>
+#include "Network.cpp"
 
-    Time currentTime;
+class Framework {
+public:
+    Network *network;
+    vector <Trajectory> trajectory;
+
+    Time *currentTime;
     int maxNumberOfEvents;
     int numLoops;
     int networkEventsExecuted = 0;
@@ -13,24 +18,23 @@ public class Framework {
     int outputsPrinted = 0;
 
 
-    public Framework(Network m, ArrayList<Trajectory> trajectory) {
+    Framework(Network m, vector <Trajectory> traj) {
         this.network = m;
-        this.trajectory = trajectory;
-        currentTime = new Time(0,0);
+        this.trajectory = traj;
+        currentTime = new Time(0, 0);
         this.maxNumberOfEvents = Integer.MAX_VALUE;
         this.numLoops = 1;
         this.maxOutputs = Integer.MAX_VALUE;
     }
 
 
-
-    public Framework(Network m, ArrayList<Trajectory> trajectory, int maxNumberOfEvents, int numLoops, int maxOutputs) {
+    Framework(Network *m, vector <Trajectory> traj, int maxNumberOfEvents, int numLoops, int maxOutputs) {
         this.network = m;
-        this.trajectory = trajectory;
-        currentTime = new Time(0,0);
+        this.trajectory = traj;
+        currentTime = new Time(0, 0);
         this.maxNumberOfEvents = maxNumberOfEvents;
         this.numLoops = numLoops;
-        this.maxOutputs =  maxOutputs;
+        this.maxOutputs = maxOutputs;
     }
 
     void start() {
@@ -38,12 +42,13 @@ public class Framework {
         /** add all of the events which are read from the input trajectory*/
 
         for (Trajectory t : trajectory) {
-            for (int i =0; i<t.inputs.length; i++) {
+            for (int i = 0; i < t.inputs.length; i++) {
                 //tell each of the input ports/models about what it will be receiving
                 Model startingPoint = network.findConnectedModel(i);
                 String startingModelName = network.getModelName(startingPoint);
-                for (int j = 0; j<numLoops; j++) {
-                    network.events.insert(new Event(startingPoint, new Time(t.time, 0), "external", startingModelName, t.inputs[i]));
+                for (int j = 0; j < numLoops; j++) {
+                    network.events.insert(
+                            new Event(startingPoint, new Time(t.time, 0), "external", startingModelName, t.inputs[i]));
                 }
             }
         }
@@ -54,9 +59,9 @@ public class Framework {
         while (nextEvent != null && eventsExecuted < this.maxNumberOfEvents && outputsPrinted < maxOutputs) {
 
             currentTime = nextEvent.time; //advance time
-            executeEvent(nextEvent,currentTime); //execute event
+            executeEvent(nextEvent, currentTime); //execute event
 
-            ArrayList<Event> generatedEvents = network.generateEvents(nextEvent);
+            ArrayList <Event> generatedEvents = network.generateEvents(nextEvent);
             for (Event e : generatedEvents) {
                 network.events.insert(e);
             }
@@ -75,20 +80,22 @@ public class Framework {
         System.out.println("\n\nSimulation complete");
     }
 
-    public void executeEvent(Event e, Time currentTime) {
+public
+
+    void executeEvent(Event e, Time currentTime) {
 
         if (e.action.equals("internal")) {
 
             String res = e.model.lambda();
             System.out.println(e.time.toString() + " " + e.modelName + ": " + res);
 
-            if (e.model.out == this.network.out ) {
+            if (e.model.out == this.network.out) {
                 if (numLoops != 1) {
-                    if ( networkEventsExecuted % numLoops == 0) {
+                    if (networkEventsExecuted % numLoops == 0) {
                         System.out.println("           " + e.time.toString() + " Network: " + res);
                         outputsPrinted++;
                     }
-                }  else {
+                } else {
                     System.out.println("           " + e.time.toString() + " Network: " + res);
                 }
                 networkEventsExecuted++;
@@ -105,13 +112,13 @@ public class Framework {
         } else if (e.action.equals("confluent")) {
             String res = e.model.lambda();
             System.out.println(e.time.toString() + " " + e.modelName + ": " + res);
-            if (e.model.out == this.network.out ) {
+            if (e.model.out == this.network.out) {
                 if (numLoops != 1) {
-                    if ( networkEventsExecuted % numLoops == 0) {
+                    if (networkEventsExecuted % numLoops == 0) {
                         System.out.println("           " + e.time.toString() + " Network: " + res);
                         outputsPrinted++;
                     }
-                }  else {
+                } else {
                     System.out.println("           " + e.time.toString() + " Network: " + res);
                 }
                 networkEventsExecuted++;
@@ -123,4 +130,8 @@ public class Framework {
     }
 
 
-}
+};
+
+#endif // FRAMEWORK
+
+

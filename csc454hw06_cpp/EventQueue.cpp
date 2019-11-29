@@ -1,13 +1,19 @@
-public class EventQueue  {
+#ifndef EVENT_QUEUE
+#define EVENT_QUEUE
 
-    public Event[] pQueue;
-    private int index;
+#include "Event.cpp"
+class EventQueue  {
+public: 
+    Event *pQueue;
+    int queueSize;
+     int index;
 
-    public EventQueue(int capacity){
+     EventQueue(int capacity){
         pQueue = new Event[capacity];
+         queueSize = capacity;
     }
 
-    public boolean insert(Event item ){
+     bool insert(Event item ){
         if(index == pQueue.length){
             return false;
         }
@@ -16,17 +22,17 @@ public class EventQueue  {
         return true;
     }
 
-    public Event peek(){
+     Event peek(){
         Event e = remove();
         insert(e);
         return e;
     }
 
-    public int getNumberOfElements(){
+     int getNumberOfElements(){
         return index;
     }
 
-    public Event remove(){
+    Event remove(){
         if(index == 0){
             return null;
         }
@@ -41,4 +47,7 @@ public class EventQueue  {
         pQueue[minIndex] = pQueue[index];
         return result;
     }
-}
+};
+
+
+#endif

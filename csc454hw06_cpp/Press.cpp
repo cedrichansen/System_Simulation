@@ -1,13 +1,13 @@
 #ifndef PRESS
 #define PRESS
 
-template <class Integer, Integer> class Press : public Model<Integer, Integer> {
+template <int, int> class Press : public Model<int, int> {
 
 public: 
     final static int TIME_TO_PROCESS_PIECE = 1;
     double timeRemainingOnPiece;
 
-    Press(Port<Integer> in, Port<Integer> out){
+    Press(Port<int> in, Port<int> out){
         numberOfPartsToProcess = 0;
         this.numberOfInputs = 1;
         this.in = new Port[numberOfInputs];
