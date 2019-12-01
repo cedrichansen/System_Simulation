@@ -3,6 +3,7 @@
 #include "Machine.cpp"
 #include "Network.cpp"
 #include "Trajectory.cpp"
+#include "Framework.cpp"
 
 
 int  main () {
@@ -52,7 +53,9 @@ int  main () {
         trajectories.push_back(i2);
         trajectories.push_back(i3);
 
-        //(new Framework(network, getInputTrajectory("trajectory.txt"))).start();
+        Framework <int, int>  * machineFramework = new Framework<int, int>(network, trajectories);
+        machineFramework->start();
+    
 
 
         /****** FOR HW03 MODELS *****/

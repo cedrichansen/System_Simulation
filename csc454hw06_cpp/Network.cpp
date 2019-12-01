@@ -191,7 +191,7 @@ public:
             {
                 if (current->time->realTime == t->realTime && current->time->discreteTime == t->discreteTime && eventAfter->time->realTime == t->realTime && eventAfter->time->discreteTime == t->discreteTime)
                 {
-                    if (current->modelName.compare(eventAfter.modelName) == 0)
+                    if (current->modelName.compare(eventAfter->modelName) == 0)
                     {
                         if ((current->action.compare("internal") == 0 && eventAfter->action.compare("external") == 0) || (current->action.compare("external") == 0 && eventAfter->action.compare("internal") == 0))
                         {
