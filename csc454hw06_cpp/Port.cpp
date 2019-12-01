@@ -1,3 +1,6 @@
+#ifndef PORT
+#define PORT
+
 template <class T>
 class Port
 {
@@ -9,3 +12,5 @@ public:
         currentValue = initial;
     }
 };
+
+#endif

@@ -1,18 +1,26 @@
-template <class T> class Pipe {
+#ifndef PIPE
+#define PIPE
 
+template <class T>
+class Pipe
+{
+public:
     Port<T> *sending;
     Port<T> *receiving;
 
-    public Pipe(Port<T> *outgoingPort, Port<T> *receivingPort) {
-        this.sending = outgoingPort;
-        this.receiving = receivingPort;
+    Pipe(Port<T> *outgoingPort, Port<T> *receivingPort)
+    {
+        sending = outgoingPort;
+        receiving = receivingPort;
     }
 
     /**
      * Move the value from the sendingPort to the receiving port.
      */
-    public void passValue(){
+    void passValue()
+    {
         receiving->currentValue = sending->currentValue;
     }
-
 };
+
+#endif

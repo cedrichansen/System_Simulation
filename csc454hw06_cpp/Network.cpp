@@ -2,57 +2,70 @@
 #if !defined(NETWORK)
 #define NETWORK
 
+#include "EventQueue.cpp"
+#include "Port.cpp"
+#include "Time.cpp"
+#include <vector>
+#include <map>
+#include "Model.cpp"
+#include "Pipe.cpp"
+
+using namespace std;
+
 template <class IN, class OUT>
 class Network
 {
 public:
-    Map<String, Model> children;
-    EventQueue events;
-    ArrayList<Pipe> pipes = new ArrayList<Pipe>();
-    Port<IN>[] in;
-    Port<OUT> out;
+    EventQueue *events;
+    map<string, void *> *children;
+    map<string, void *> *pipes;
+    Port<IN> *in;
+    Port<OUT> *out;
     Time prevKnownTime;
-    int numInputs
+    int numInputs;
 
-    Network(Port<IN> * inputs, Port<OUT> out, int numInputs)
+    Network(Port<IN> *inputs, Port<OUT> *out, int numInputs)
     {
         this.numInputs = numInputs;
         this.in = inputs;
         this.out = out;
-        children = new HashMap<>();
+        pipes = new map<string, Pipe *>();
+        children = new map<string, Model *>();
         prevKnownTime = new Time(0, 0);
         events = new EventQueue(100);
     }
 
-    void addChild(Model *  m, String name)
+    void addModel(string modelName, void *m)
     {
-        children.put(name, m);
-        m.addParent(this);
+        children->insert(pair<string, Model<> *>(modelName, m));
     }
 
-    void addPipe(Pipe p)
+    void addPipe(string pipeName, Pipe<> *pipe)
     {
-        pipes.add(p);
+        pipes->insert(pair<string, Pipe<>*>(pipeName, pipe));
     }
 
     void passPipeValues()
     {
-        for (Pipe p : pipes)
+        map<string, Pipe *>::iterator itr;
+        for (itr = pipes->begin(); itr != pipes->end(); itr++)
         {
-            if (p.sending.currentValue != null)
+            if (itr->second->currentValue != NULL)
             {
-                p.passValue();
+                itr->second->passValue();
             }
         }
     }
 
-    std::string getModelName(Model m)
+    std::string getModelName(Model *m)
     {
-        for (Entry<String, Model> model : children.entrySet())
+
+        map<string, Pipe *>::iterator itr;
+        for (itr = children->begin(); itr != children->end(); itr++)
         {
-            if (model->getValue() == m)
+            if (itr->second == m)
             {
-                return model.getKey();
+                return itr->first;
             }
         }
         return "";
@@ -62,25 +75,27 @@ public:
      * We pass in what index of the input port we want, and we return the model that owns that port
      * @return the model connected to the port
      */
-    Model findConnectedModel(int i)
+    Model * findConnectedModel(int i)
     {
+        
         Port initial = in[i];
 
-        for (Entry<String, Model> model : children.entrySet())
+        map<string, Pipe *>::iterator itr;
+        for (itr = children->begin(); itr != children->end(); itr++)
         {
-            for (Port p : model.getValue().in)
-            {
-                if (p == initial)
-                {
-                    return model.getValue();
+            for (int i = 0; i< itr->second->numInputs ; i++) {
+                if (itr->second->numInputs[i] == initial) {
+                    return itr->second;
                 }
             }
         }
-        System.out.println("Cannot find connected model!");
-        return null;
+
+        printf("Cannot find connected model");
+        return NULL;
+
     }
 
-    Model findModelToCreateEventFor(Port o)
+    Model findModelToCreateEventFor(Port<> o)
     {
         Port inPort = null;
         for (Pipe p : pipes)
@@ -109,40 +124,40 @@ public:
         return null;
     }
 
-    ArrayList<Event> generateEvents(Event event)
+    vector<Event> generateEvents(Event event)
     {
-        ArrayList<Event> events = new ArrayList<>();
+        vector<Event> events = new vector<Event>();
 
-        if (event.action.equals("internal") || event.action.equals("confluent"))
+        if (event->action.compare("internal") == 0 || event->action.compare("confluent") == 0)
         {
 
             //we will create an external event for whatever is connected to its pipe
-            Model other = findModelToCreateEventFor(event.model.out);
-            String modelName = getModelName(other);
+            Model other = findModelToCreateEventFor(event->model->out);
+            string modelName = getModelName(other);
             if (other != null)
             {
-                Event e = new Event(other, event.time, "external", modelName, "");
-                events.add(e);
+                Event e = new Event(other, event->time, "external", modelName, "");
+                events.push_back(e);
             }
             //create an internal transition for ourselves if needed
-            Time modelAdvance = event.model.timeAdvance();
-            if (modelAdvance.realTime != event.model.getMaxTimeAdvance())
+            Time modelAdvance = event->model->timeAdvance();
+            if (modelAdvance->realTime != event->model->getMaxTimeAdvance())
             {
                 Time eventTime = new Time(event.time.realTime + modelAdvance.realTime, 0);
                 Event ourOwnNextEvent = new Event(event.model, eventTime, "internal", event.modelName, "");
                 events.add(ourOwnNextEvent);
             }
         }
-        else if (event.action.equals("external"))
+        else if (event->action.compare("external") == 0)
         {
             //remove the old internal event.. It may no longer be correct
-            this.events = removeInternalEvent(event.model);
+            events = removeInternalEvent(event->model);
 
             //Create a new internal event. It may or may not create the same event that was just deleted
-            Time modelAdvance = event.model.timeAdvance();
-            Time eventTime = new Time(event.time.realTime + modelAdvance.realTime, 0);
+            Time modelAdvance = event->model->timeAdvance();
+            Time eventTime = new Time(event->time.realTime + modelAdvance->realTime, 0);
             Event e = new Event(event.model, eventTime, "internal", event.modelName, "");
-            events.add(e);
+            events.push_back(e);
         }
 
         return events;
@@ -151,14 +166,14 @@ public:
     /**
      * creates confluent events, and adds it to list, and also deletes the required internal and external events
      */
-    EventQueue createConfluentEvent()
+    EventQueue * createConfluentEvent()
     {
 
-        EventQueue updatedEvents = new EventQueue(this.events.pQueue.length);
+        EventQueue * updatedEvents = new EventQueue(events->getNumberOfElements);
 
         Time t = events.peek().time;
-        Event current = events.remove();
-        Event eventAfter = events.peek();
+        Event * current = events.remove();
+        Event * eventAfter = events.peek();
 
         while (current != null)
         {
@@ -166,20 +181,19 @@ public:
             if (eventAfter == null)
             {
                 //the current event is the last event, so it can't be confluent. add it
-                updatedEvents.insert(current);
+                updatedEvents->insert(current);
             }
             else
             {
-                if (current.time.realTime == t.realTime && current.time.discreteTime == t.discreteTime && eventAfter.time.realTime == t.realTime && eventAfter.time.discreteTime == t.discreteTime)
+                if (current->time->realTime == t->realTime && current->time->discreteTime == t->discreteTime && eventAfter->time->realTime == t->realTime && eventAfter->time->discreteTime == t->discreteTime)
                 {
-                    if (current.modelName.equals(eventAfter.modelName))
+                    if (current->modelName.compare(eventAfter->modelName) == 0)
                     {
-                        if ((current.action.equals("internal") && eventAfter.action.equals("external")) || (current.action.equals("external") && eventAfter.action.equals("internal")))
+                        if ((current.action.compare("internal") == 0 && eventAfter->action.compare("external") == 0) || (current->action.compare("external") == 0 && eventAfter->action.compare("internal") == 0))
                         {
-                            //we have found a confluent case
                             events.remove(); //this will remove the eventAfter
 
-                            String input = current.input.equals("") ? eventAfter.input : current.input;
+                            string input = current->input.compare("") == 0 ? eventAfter->input : current->input;
                             Event con = new Event(current.model, current.time, "confluent", current.modelName, input);
                             updatedEvents.insert(con);
                         }

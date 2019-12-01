@@ -2,19 +2,20 @@
 #define EVENT_QUEUE
 
 #include "Event.cpp"
+
 class EventQueue  {
 public: 
-    Event *pQueue;
+    Event * pQueue;
     int queueSize;
-     int index;
+    int index;
 
      EventQueue(int capacity){
         pQueue = new Event[capacity];
-         queueSize = capacity;
+        queueSize = capacity;
     }
 
      bool insert(Event item ){
-        if(index == pQueue.length){
+        if(index == queueSize){
             return false;
         }
         pQueue[index] = item;
@@ -34,7 +35,7 @@ public:
 
     Event remove(){
         if(index == 0){
-            return null;
+            return Event(NULL, NULL, "nothing", "-1", "-1");
         }
         int minIndex = 0;
         for (int i=1; i<index; i++) {

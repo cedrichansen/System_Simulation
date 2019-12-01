@@ -9,8 +9,6 @@
 int  main () {
 
         /****** FOR HW05 ***/
-
-
         Port<int> * pressInPort = new Port<int>(0);
 
         Port<int> * netIn = {pressInPort};
@@ -28,11 +26,11 @@ int  main () {
 
         Network<int, int> * network = new Network<int, int>(netIn, drillOutPort);
 
-        network->addChild(drill, "drill");
-        network->addChild(press, "press");
+        network->addModel(drill, "drill");
+        network->addModel(press, "press");
         network->addPipe(p2);
 
-        (new Framework(network, getInputTrajectory("trajectory.txt"))).start();
+        //(new Framework(network, getInputTrajectory("trajectory.txt"))).start();
 
 
         /****** FOR HW03 MODELS *****/

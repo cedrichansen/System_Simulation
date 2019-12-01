@@ -21,6 +21,9 @@ public:
         modelName = modelName;
         input = input;
     }
+    Event(){
+        
+    }
 
 
     int compareTo(Event e) {
