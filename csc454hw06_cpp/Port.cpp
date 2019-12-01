@@ -11,6 +11,10 @@ public:
     {
         currentValue = initial;
     }
+
+    Port (){
+        currentValue = NULL;
+    }
 };
 
 #endif

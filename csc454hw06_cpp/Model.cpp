@@ -1,42 +1,37 @@
 #ifndef MODEL
 #define MODEL
 
-#include "Network.cpp"
 #include "Time.cpp"
 #include "Port.cpp"
-
+#include <math.h>
+#include <float.h>
 
 template <class IN, class OUT>
 class Model
 {
 public:
-
-    Port<IN> * in;
+    Port<IN> * * in;
     Port<OUT> * out;
+
+    std::string name;
 
     int numberOfInputs;
     Time * lastKnownTime;
     int numberOfPartsToProcess;
 
+    std::string lambda() {}
 
-    virtual std::string lambda() = 0;
+    void externalTransition(Time elapsedTime, std::string in) {}
 
+    void internalTransition() {}
 
-    virtual void externalTransition(Time elapsedTime, std::string in) = 0;
+    void confluentTransition(Time elapsedTime, std::string in) {}
 
+    Time *timeAdvance() {}
 
-    virtual void internalTransition() = 0;
+    double getMaxTimeAdvance() {}
 
-
-    virtual void confluentTransition(Time elapsedTime, std::string in) = 0;
-
-
-    virtual Time * timeAdvance() = 0;
-
-
-    virtual double getMaxTimeAdvance() = 0;
-
-    virtual std::string toString() = 0;
+    std::string toString() {}
 };
 
 #endif

@@ -20,15 +20,15 @@ int  main () {
 
         Port<int> * drillOutPort = new Port<int>(0);
 
-        Press<int, int> * press = new Press<int, int>(pressInPort, pressOutPort);
+        Machine * press = new Machine(pressInPort, pressOutPort, 1, "press");
 
-        Drill<int, int> * drill = new Drill<int, int>(drillInPort, drillOutPort);
+        Machine * drill = new Machine(pressInPort, pressOutPort, 2, "drill");
 
         Network<int, int> * network = new Network<int, int>(netIn, drillOutPort);
 
         network->addModel(drill, "drill");
         network->addModel(press, "press");
-        network->addPipe(p2);
+        network->addPipe(p2, "p2");
 
         //(new Framework(network, getInputTrajectory("trajectory.txt"))).start();
 

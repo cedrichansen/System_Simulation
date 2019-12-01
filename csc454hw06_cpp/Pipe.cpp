@@ -1,6 +1,8 @@
 #ifndef PIPE
 #define PIPE
 
+#include "Port.cpp"
+
 template <class T>
 class Pipe
 {
