@@ -4,10 +4,14 @@
 
 #include <vector>
 #include "Network.cpp"
+#include <iterator>
 
+
+using namespace std;
+template <class IN, class OUT>
 class Framework {
 public:
-    Network *network;
+    Network<IN, OUT> *network;
     vector <Trajectory> trajectory;
 
     Time *currentTime;
@@ -18,23 +22,23 @@ public:
     int outputsPrinted = 0;
 
 
-    Framework(Network m, vector <Trajectory> traj) {
-        this.network = m;
-        this.trajectory = traj;
+    Framework(Network<IN, OUT> * n, vector <Trajectory> traj) {
+        network = n;
+        trajectory = traj;
         currentTime = new Time(0, 0);
-        this.maxNumberOfEvents = Integer.MAX_VALUE;
-        this.numLoops = 1;
-        this.maxOutputs = Integer.MAX_VALUE;
+        maxNumberOfEvents = 999999;
+        numLoops = 1;
+        maxOutputs = 999999;
     }
 
 
-    Framework(Network *m, vector <Trajectory> traj, int maxNumberOfEvents, int numLoops, int maxOutputs) {
-        this.network = m;
-        this.trajectory = traj;
+    Framework(Network<IN, OUT> * n, vector <Trajectory> traj, int maxNumberOfEvs, int numL, int maxOutput) {
+        network = n;
+        trajectory = traj;
         currentTime = new Time(0, 0);
-        this.maxNumberOfEvents = maxNumberOfEvents;
-        this.numLoops = numLoops;
-        this.maxOutputs = maxOutputs;
+        maxNumberOfEvents = maxNumberOfEvs;
+        numLoops = numL;
+        maxOutputs = maxOutput;
     }
 
     void start() {
@@ -44,43 +48,42 @@ public:
         for (Trajectory t : trajectory) {
             for (int i = 0; i < t.inputs.length; i++) {
                 //tell each of the input ports/models about what it will be receiving
-                Model startingPoint = network.findConnectedModel(i);
-                String startingModelName = network.getModelName(startingPoint);
+                Model<IN, OUT> * startingPoint = network.findConnectedModel(i);
+                string startingModelName = network.getModelName(startingPoint);
                 for (int j = 0; j < numLoops; j++) {
-                    network.events.insert(
+                    network->events->insert(
                             new Event(startingPoint, new Time(t.time, 0), "external", startingModelName, t.inputs[i]));
                 }
             }
         }
 
         int eventsExecuted = 0;
-        Event nextEvent = network.events.remove();
+        Event nextEvent = network->events.remove();
 
-        while (nextEvent != null && eventsExecuted < this.maxNumberOfEvents && outputsPrinted < maxOutputs) {
+        while (nextEvent.input.compare("-1") != 0 && eventsExecuted < maxNumberOfEvents && outputsPrinted < maxOutputs) {
 
             currentTime = nextEvent.time; //advance time
             executeEvent(nextEvent, currentTime); //execute event
 
-            ArrayList <Event> generatedEvents = network.generateEvents(nextEvent);
-            for (Event e : generatedEvents) {
-                network.events.insert(e);
+            vector <Event<IN, OUT>*> generatedEvents = network.generateEvents(nextEvent);
+            vector <Event<IN, OUT>*>::iterator itr;
+            for (itr = generatedEvents->start(); itr< generatedEvents->end(); itr++) {
+                network->events->insert(itr->second());
             }
 
-            if (network.events.getNumberOfElements() > 0) {
-                network.events = network.createConfluentEvent();
-                nextEvent = network.events.remove();
+            if (network->events->getNumberOfElements() > 0) {
+                network->events = network.createConfluentEvent();
+                nextEvent = network->events->remove();
             } else {
-                nextEvent = null;
+                nextEvent = Event(NULL, NULL, "nothing", "-1" , "-1");
             }
 
             eventsExecuted++;
         }
 
 
-        System.out.println("\n\nSimulation complete");
+        printf("\n\nSimulation complete");
     }
-
-public
 
     void executeEvent(Event e, Time currentTime) {
 

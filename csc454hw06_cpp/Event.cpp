@@ -4,17 +4,19 @@
 #include <string>
 #include "Model.cpp"
 #include "Time.cpp"
+#include "Model.cpp"
 
-class Event {
+template <class IN, class OUT>
+class Event{
 
 public: 
-    void * model;
+    Model<IN, OUT> * model;
     std::string action;
     Time * time;
     std::string modelName;
     std::string input;
 
-    Event(void * m, Time * t, std::string a, std::string modelName, std::string input) {
+    Event(Model<IN,OUT> * m, Time * t, std::string a, std::string modelName, std::string input) {
         model = m;
         time = t;
         action = a;

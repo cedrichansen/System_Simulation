@@ -9,61 +9,66 @@
 #include <map>
 #include "Model.cpp"
 #include "Pipe.cpp"
+#include <iterator>
 
 using namespace std;
 
 template <class IN, class OUT>
 class Network
 {
+
 public:
-    EventQueue *events;
-    map<string, Model<IN, OUT> *> *children;
-    map<string, Pipe<IN> *> *pipes;
+    using modelPtr = Model<IN, OUT> *;
+    using pipePtr = Pipe<IN> *;
+
+    EventQueue<IN, OUT> *events;
+    map<string, modelPtr> *children;
+    map<string, pipePtr> *pipes;
     Port<IN> *in;
     Port<OUT> *out;
     int numInputs;
+    typename map<string, pipePtr>::iterator pipeItr;
+    typename map<string, modelPtr>::iterator modelItr;
 
     Network(Port<IN> *inputs, Port<OUT> *outp, int numInputs)
     {
         numInputs = numInputs;
         in = inputs;
         out = outp;
-        pipes = new map<string, Pipe<IN>*>();
-        children = new map<string, Model<IN, OUT> *>();
-        events = new EventQueue(100);
+        pipes = new map<string, pipePtr>();
+        children = new map<string, modelPtr>();
+        events = new EventQueue<IN, OUT>(100);
     }
 
     void addModel(Model<IN, OUT> *m, string modelName)
     {
-        children->insert(pair<string, Model<IN, OUT> *>(modelName, m));
+        children->insert(pair<string, modelPtr>(modelName, m));
     }
 
     void addPipe(Pipe<IN> *pipe, string pipeName)
     {
-        pipes->insert(pair<string, Pipe<IN> *>(pipeName, pipe));
+        pipes->insert(pair<string, pipePtr>(pipeName, pipe));
     }
 
     void passPipeValues()
     {
-        map<string, Pipe<IN> *>::iterator itr;
-        for (itr = pipes->begin(); itr != pipes->end(); itr++)
+        for (pipeItr = pipes->begin(); pipeItr != pipes->end(); pipeItr++)
         {
-            if (itr->second->currentValue != NULL)
+            if (pipeItr->second->currentValue != NULL)
             {
-                itr->second->passValue();
+                pipeItr->second->passValue();
             }
         }
     }
 
-    std::string getModelName(void *m)
+    std::string getModelName(Model<IN, OUT> *m)
     {
 
-        map<string, Pipe<IN> *>::iterator itr;
-        for (itr = children->begin(); itr != children->end(); itr++)
+        for (modelItr = children->begin(); modelItr != children->end(); modelItr++)
         {
-            if (itr->second == m)
+            if (modelItr->second == m)
             {
-                return itr->first;
+                return modelItr->first;
             }
         }
         return "";
@@ -73,19 +78,18 @@ public:
      * We pass in what index of the input port we want, and we return the model that owns that port
      * @return the model connected to the port
      */
-    Model<IN, OUT> * findConnectedModel(int i)
+    Model<IN, OUT> *findConnectedModel(int i)
     {
 
-        Port initial = in[i];
+        Port<IN> initial = in[i];
 
-        map<string, Model<IN,OUT> *>::iterator itr;
-        for (itr = children->begin(); itr != children->end(); itr++)
+        for (modelItr = children->begin; modelItr != children->end(); modelItr++)
         {
-            for (int i = 0; i < m->numInputs; i++)
+            for (int i = 0; i < modelItr->second->numInputs; i++)
             {
-                if (m->numInputs[i] == initial)
+                if (modelItr->second->numInputs[i] == initial)
                 {
-                    return itr->second;
+                    return modelItr->second;
                 }
             }
         }
@@ -94,32 +98,29 @@ public:
         return NULL;
     }
 
-    Model<IN, OUT> * findModelToCreateEventFor(Port<IN> * o)
+    Model<IN, OUT> *findModelToCreateEventFor(Port<IN> *o)
     {
 
-        Port inPort = NULL;
+        Port<IN> inPort = NULL;
 
-        map<string, Pipe<IN> *>::iterator itr;
-        for (itr = pipes->begin(); itr != pipes->end(); itr++)
+        for (pipeItr = pipes->begin(); pipeItr != pipes->end(); pipeItr++)
         {
-            Port<IN> s = itr->second->sending;
-            if (s == o)
+            if (pipeItr->second->sending == o)
             {
-                inPort = itr->second->receiving;
+                inPort = pipeItr->second->receiving;
                 break;
             }
         }
 
         if (inPort != NULL)
         {
-            map<string, Model<IN, OUT> *>::iterator itr2;
-            for (itr2 = children->begin(); itr2 != children->end(); itr2++)
+            for (modelItr = children->begin(); modelItr != children->end(); modelItr++)
             {
-                for (int i = 0; i < itr2->second->numInputs; i++)
+                for (int i = 0; i < modelItr->second->numInputs; i++)
                 {
-                    if (itr2->second->in[i] == inPort)
+                    if (modelItr->second->in[i] == inPort)
                     {
-                        return itr2->second;
+                        return modelItr->second;
                     }
                 }
             }
@@ -127,28 +128,27 @@ public:
         return NULL;
     }
 
-    vector<Event> generateEvents(Event event)
+    vector<Event<IN, OUT>*> generateEvents(Event<IN, OUT> event)
     {
-        vector<Event> events = new vector<Event>();
+        vector<Event<IN, OUT> *> generatedEvents;
 
         if (event.action.compare("internal") == 0 || event.action.compare("confluent") == 0)
         {
-
             //we will create an external event for whatever is connected to its pipe
-            Model<IN, OUT> *  other = findModelToCreateEventFor(event.model->out);
+            Model<IN, OUT> *other = findModelToCreateEventFor(event.model->out);
             string modelName = getModelName(other);
             if (other != NULL)
             {
-                Event e = new Event(other, event.time, "external", modelName, "");
-                events.push_back(e);
+                Event<IN, OUT> *e = new Event<IN, OUT>(other, event.time, "external", modelName, "");
+                generatedEvents->push_back(e);
             }
             //create an internal transition for ourselves if needed
-            Time *  modelAdvance = event.model->timeAdvance();
+            Time *modelAdvance = event.model->timeAdvance();
             if (modelAdvance->realTime != event.model->getMaxTimeAdvance())
             {
-                Time eventTime(event.time.realTime + modelAdvance.realTime, 0);
-                Event ourOwnNextEvent = new Event(event.model, eventTime, "internal", event.modelName, "");
-                events.push_back(ourOwnNextEvent);
+                Time *eventTime = new Time(event.time->realTime + modelAdvance->realTime, 0);
+                Event<IN, OUT> *ourOwnNextEvent = new Event<IN, OUT>(event.model, eventTime, "internal", event.modelName, "");
+                generatedEvents.push_back(ourOwnNextEvent);
             }
             delete modelAdvance;
         }
@@ -158,47 +158,47 @@ public:
             events = removeInternalEvent(event.model);
 
             //Create a new internal event. It may or may not create the same event that was just deleted
-            Time modelAdvance = event.model->timeAdvance();
-            Time eventTime = new Time(event.time.realTime + modelAdvance->realTime, 0);
-            Event e = new Event(event.model, eventTime, "internal", event.modelName, "");
-            events.push_back(e);
+            Time *modelAdvance = event.model->timeAdvance();
+            Time *eventTime = new Time(event.time->realTime + modelAdvance->realTime, 0);
+            Event<IN, OUT> *e = new Event<IN, OUT>(event.model, eventTime, "internal", event.modelName, "");
+            generatedEvents.push_back(e);
         }
 
-        return events;
+        return generatedEvents;
     }
 
     /**
      * creates confluent events, and adds it to list, and also deletes the required internal and external events
      */
-    EventQueue *createConfluentEvent()
+    EventQueue<IN, OUT> *createConfluentEvent()
     {
 
-        EventQueue *updatedEvents = new EventQueue(events->getNumberOfElements);
+        EventQueue<IN, OUT> *updatedEvents = new EventQueue<IN, OUT>(events->getNumberOfElements());
 
-        Time t = events->peek().time;
-        Event *current = events.remove();
-        Event *eventAfter = events.peek();
+        Time * t = events->peek().time;
+        Event<IN, OUT> current = events->remove();
+        Event<IN, OUT> eventAfter = events->peek();
 
-        while (current != null)
+        while (current.action.compare("nothing") != 0)
         {
 
-            if (eventAfter == null)
+            if (eventAfter.action.compare("nothing") != 0)
             {
                 //the current event is the last event, so it can't be confluent. add it
                 updatedEvents->insert(current);
             }
             else
             {
-                if (current->time->realTime == t->realTime && current->time->discreteTime == t->discreteTime && eventAfter->time->realTime == t->realTime && eventAfter->time->discreteTime == t->discreteTime)
+                if (current.time->realTime == t->realTime && current.time->discreteTime == t->discreteTime && eventAfter.time->realTime == t->realTime && eventAfter.time->discreteTime == t->discreteTime)
                 {
-                    if (current->modelName.compare(eventAfter->modelName) == 0)
+                    if (current.modelName.compare(eventAfter.modelName) == 0)
                     {
-                        if ((current.action.compare("internal") == 0 && eventAfter->action.compare("external") == 0) || (current->action.compare("external") == 0 && eventAfter->action.compare("internal") == 0))
+                        if ((current.action.compare("internal") == 0 && eventAfter.action.compare("external") == 0) || (current->action.compare("external") == 0 && eventAfter->action.compare("internal") == 0))
                         {
                             events->remove(); //this will remove the eventAfter
 
-                            string input = current->input.compare("") == 0 ? eventAfter->input : current->input;
-                            Event con = new Event(current.model, current.time, "confluent", current.modelName, input);
+                            string input = current.input.compare("") == 0 ? eventAfter.input : current.input;
+                            Event<IN, OUT> con = new Event<IN, OUT>(current.model, current.time, "confluent", current.modelName, input);
                             updatedEvents->insert(con);
                         }
                     }
@@ -221,10 +221,10 @@ public:
         return updatedEvents;
     }
 
-    EventQueue * removeInternalEvent(Model<IN, OUT> * m)
+    EventQueue<IN, OUT> *removeInternalEvent(modelPtr m)
     {
-        EventQueue * validEvents = new EventQueue(events->getNumberOfElements);
-        Event * e = events->remove();
+        EventQueue<IN, OUT> *validEvents = new EventQueue<IN, OUT>(events->getNumberOfElements());
+        Event<IN, OUT> *e = events->remove();
 
         while (e != NULL)
         {
@@ -239,7 +239,7 @@ public:
 
     string toString()
     {
-        return "Network -- events:" + to_string(events.getNumberOfElements());
+        return "Network -- events:" + to_string(events->getNumberOfElements());
     }
 };
 

@@ -3,18 +3,19 @@
 
 #include "Event.cpp"
 
+template <class IN, class OUT>
 class EventQueue  {
 public: 
-    Event * pQueue;
+    Event<IN, OUT> * pQueue;
     int queueSize;
     int index;
 
      EventQueue(int capacity){
-        pQueue = new Event[capacity];
+        pQueue = new Event<IN, OUT>[capacity];
         queueSize = capacity;
     }
 
-     bool insert(Event item ){
+     bool insert(Event<IN, OUT> item ){
         if(index == queueSize){
             return false;
         }
@@ -23,8 +24,8 @@ public:
         return true;
     }
 
-     Event peek(){
-        Event e = remove();
+     Event<IN, OUT> peek(){
+        Event<IN, OUT> e = remove();
         insert(e);
         return e;
     }
@@ -33,9 +34,9 @@ public:
         return index;
     }
 
-    Event remove(){
+    Event<IN, OUT> remove(){
         if(index == 0){
-            return Event(NULL, NULL, "nothing", "-1", "-1");
+            return Event<IN, OUT>(NULL, NULL, "nothing", "-1", "-1");
         }
         int minIndex = 0;
         for (int i=1; i<index; i++) {
@@ -43,7 +44,7 @@ public:
                 minIndex = i;
             }
         }
-        Event result = pQueue[minIndex];
+        Event<IN, OUT> result = pQueue[minIndex];
         index--;
         pQueue[minIndex] = pQueue[index];
         return result;
