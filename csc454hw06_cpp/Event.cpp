@@ -23,10 +23,6 @@ public:
         modelName = modelName;
         input = input;
     }
-    Event(){
-        
-    }
-
 
     int compareTo(Event e) {
         if (time->compareTo(e.time) == 0) {

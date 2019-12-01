@@ -6,16 +6,16 @@
 template <class IN, class OUT>
 class EventQueue  {
 public: 
-    Event<IN, OUT> * pQueue;
+    Event<IN, OUT> ** pQueue;
     int queueSize;
     int index;
 
      EventQueue(int capacity){
-        pQueue = new Event<IN, OUT>[capacity];
+        pQueue = new Event<IN, OUT>*[capacity];
         queueSize = capacity;
     }
 
-     bool insert(Event<IN, OUT> item ){
+     bool insert(Event<IN, OUT> *item ){
         if(index == queueSize){
             return false;
         }
@@ -24,8 +24,8 @@ public:
         return true;
     }
 
-     Event<IN, OUT> peek(){
-        Event<IN, OUT> e = remove();
+     Event<IN, OUT> * peek(){
+        Event<IN, OUT>* e = remove();
         insert(e);
         return e;
     }
@@ -34,17 +34,17 @@ public:
         return index;
     }
 
-    Event<IN, OUT> remove(){
+    Event<IN, OUT> *remove(){
         if(index == 0){
-            return Event<IN, OUT>(NULL, NULL, "nothing", "-1", "-1");
+            return NULL;
         }
         int minIndex = 0;
         for (int i=1; i<index; i++) {
-            if (pQueue[i].compareTo(pQueue[minIndex]) < 0) {
+            if (pQueue[i]->compareTo(pQueue[minIndex]) < 0) {
                 minIndex = i;
             }
         }
-        Event<IN, OUT> result = pQueue[minIndex];
+        Event<IN, OUT> * result = pQueue[minIndex];
         index--;
         pQueue[minIndex] = pQueue[index];
         return result;

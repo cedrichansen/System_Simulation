@@ -13,7 +13,7 @@ using namespace std;
 class Machine : public Model<int, int> {
 
 public: 
-    static int TIME_TO_PROCESS_PIECE;;
+    static int TIME_TO_PROCESS_PIECE;
     double timeRemainingOnPiece;
 
     Machine(Port<int> * inp, Port<int> * outp, int timeToProcessPiece, string name){

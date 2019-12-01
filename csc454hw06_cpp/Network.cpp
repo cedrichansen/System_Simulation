@@ -176,29 +176,29 @@ public:
         EventQueue<IN, OUT> *updatedEvents = new EventQueue<IN, OUT>(events->getNumberOfElements());
 
         Time * t = events->peek().time;
-        Event<IN, OUT> current = events->remove();
-        Event<IN, OUT> eventAfter = events->peek();
+        Event<IN, OUT> * current = events->remove();
+        Event<IN, OUT> * eventAfter = events->peek();
 
-        while (current.action.compare("nothing") != 0)
+        while (current->action.compare("nothing") != 0)
         {
 
-            if (eventAfter.action.compare("nothing") != 0)
+            if (eventAfter->action.compare("nothing") != 0)
             {
                 //the current event is the last event, so it can't be confluent. add it
                 updatedEvents->insert(current);
             }
             else
             {
-                if (current.time->realTime == t->realTime && current.time->discreteTime == t->discreteTime && eventAfter.time->realTime == t->realTime && eventAfter.time->discreteTime == t->discreteTime)
+                if (current->time->realTime == t->realTime && current->time->discreteTime == t->discreteTime && eventAfter->time->realTime == t->realTime && eventAfter->time->discreteTime == t->discreteTime)
                 {
-                    if (current.modelName.compare(eventAfter.modelName) == 0)
+                    if (current->modelName.compare(eventAfter.modelName) == 0)
                     {
-                        if ((current.action.compare("internal") == 0 && eventAfter.action.compare("external") == 0) || (current->action.compare("external") == 0 && eventAfter->action.compare("internal") == 0))
+                        if ((current->action.compare("internal") == 0 && eventAfter->action.compare("external") == 0) || (current->action.compare("external") == 0 && eventAfter->action.compare("internal") == 0))
                         {
                             events->remove(); //this will remove the eventAfter
 
-                            string input = current.input.compare("") == 0 ? eventAfter.input : current.input;
-                            Event<IN, OUT> con = new Event<IN, OUT>(current.model, current.time, "confluent", current.modelName, input);
+                            string input = current->input.compare("") == 0 ? eventAfter->input : current->input;
+                            Event<IN, OUT> * con = new Event<IN, OUT>(current->model, current->time, "confluent", current->modelName, input);
                             updatedEvents->insert(con);
                         }
                     }

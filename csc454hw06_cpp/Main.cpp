@@ -2,7 +2,7 @@
 #include "Pipe.cpp"
 #include "Machine.cpp"
 #include "Network.cpp"
-
+#include "Trajectory.cpp"
 
 
 int  main () {
@@ -23,11 +23,34 @@ int  main () {
 
         Machine * drill = new Machine(pressInPort, pressOutPort, 2, "drill");
 
-        Network<int, int> * network = new Network<int, int>(netIn, drillOutPort);
+        Network<int, int> * network = new Network<int, int>(netIn, drillOutPort, 1);
 
         network->addModel(drill, "drill");
         network->addModel(press, "press");
         network->addPipe(p2, "p2");
+
+        vector<Trajectory * > trajectories;
+
+        /**
+        2.0,2
+        3.0,2
+        15.0,2
+         */
+        string * ins1 = new string[1];
+        ins1[0] = "2";
+        Trajectory * i1 = new Trajectory(2.0, ins1, 1);
+        
+        string * ins2 = new string[1];
+        ins2[0] = "2";
+        Trajectory * i2 = new Trajectory(3.0,ins2, 1);
+
+        string * ins3 = new string[1];
+        ins3[0] = "2";
+        Trajectory *  i3 = new Trajectory(15.0, ins3, 1);
+
+        trajectories.push_back(i1);
+        trajectories.push_back(i2);
+        trajectories.push_back(i3);
 
         //(new Framework(network, getInputTrajectory("trajectory.txt"))).start();
 
