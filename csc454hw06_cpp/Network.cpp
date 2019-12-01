@@ -1,5 +1,5 @@
 
-#if !defined(NETWORK)
+#ifndef NETWORK
 #define NETWORK
 
 #include "EventQueue.cpp"
@@ -17,8 +17,8 @@ class Network
 {
 public:
     EventQueue *events;
-    map<string, void *> *children;
-    map<string, void *> *pipes;
+    map<string, Model<IN, OUT> *> *children;
+    map<string, Pipe<IN> *> *pipes;
     Port<IN> *in;
     Port<OUT> *out;
     int numInputs;
@@ -28,24 +28,24 @@ public:
         numInputs = numInputs;
         in = inputs;
         out = outp;
-        pipes = new map<string, Pipe<> *>();
-        children = new map<string, Model<> *>();
+        pipes = new map<string, Pipe<IN>*>();
+        children = new map<string, Model<IN, OUT> *>();
         events = new EventQueue(100);
     }
 
-    void addModel(void *m, string modelName)
+    void addModel(Model<IN, OUT> *m, string modelName)
     {
-        children->insert(pair<string, Model<> *>(modelName, m));
+        children->insert(pair<string, Model<IN, OUT> *>(modelName, m));
     }
 
-    void addPipe(Pipe<> *pipe, string pipeName)
+    void addPipe(Pipe<IN> *pipe, string pipeName)
     {
-        pipes->insert(pair<string, Pipe<> *>(pipeName, pipe));
+        pipes->insert(pair<string, Pipe<IN> *>(pipeName, pipe));
     }
 
     void passPipeValues()
     {
-        map<string, Pipe<> *>::iterator itr;
+        map<string, Pipe<IN> *>::iterator itr;
         for (itr = pipes->begin(); itr != pipes->end(); itr++)
         {
             if (itr->second->currentValue != NULL)
@@ -55,10 +55,10 @@ public:
         }
     }
 
-    std::string getModelName(Model<> *m)
+    std::string getModelName(void *m)
     {
 
-        map<string, Pipe<> *>::iterator itr;
+        map<string, Pipe<IN> *>::iterator itr;
         for (itr = children->begin(); itr != children->end(); itr++)
         {
             if (itr->second == m)
@@ -73,17 +73,17 @@ public:
      * We pass in what index of the input port we want, and we return the model that owns that port
      * @return the model connected to the port
      */
-    Model *findConnectedModel(int i)
+    Model<IN, OUT> * findConnectedModel(int i)
     {
 
         Port initial = in[i];
 
-        map<string, Model<> *>::iterator itr;
+        map<string, Model<IN,OUT> *>::iterator itr;
         for (itr = children->begin(); itr != children->end(); itr++)
         {
-            for (int i = 0; i < itr->second->numInputs; i++)
+            for (int i = 0; i < m->numInputs; i++)
             {
-                if (itr->second->numInputs[i] == initial)
+                if (m->numInputs[i] == initial)
                 {
                     return itr->second;
                 }
@@ -94,15 +94,15 @@ public:
         return NULL;
     }
 
-    Model * findModelToCreateEventFor(Port<> *o)
+    Model<IN, OUT> * findModelToCreateEventFor(Port<IN> * o)
     {
 
         Port inPort = NULL;
 
-        map<string, Pipe<> *>::iterator itr;
+        map<string, Pipe<IN> *>::iterator itr;
         for (itr = pipes->begin(); itr != pipes->end(); itr++)
         {
-            Port s = itr->second->sending;
+            Port<IN> s = itr->second->sending;
             if (s == o)
             {
                 inPort = itr->second->receiving;
@@ -112,7 +112,7 @@ public:
 
         if (inPort != NULL)
         {
-            map<string, Model<> *>::iterator itr2;
+            map<string, Model<IN, OUT> *>::iterator itr2;
             for (itr2 = children->begin(); itr2 != children->end(); itr2++)
             {
                 for (int i = 0; i < itr2->second->numInputs; i++)
@@ -131,20 +131,20 @@ public:
     {
         vector<Event> events = new vector<Event>();
 
-        if (event->action.compare("internal") == 0 || event->action.compare("confluent") == 0)
+        if (event.action.compare("internal") == 0 || event.action.compare("confluent") == 0)
         {
 
             //we will create an external event for whatever is connected to its pipe
-            Model *  other = findModelToCreateEventFor(event->model->out);
+            Model<IN, OUT> *  other = findModelToCreateEventFor(event.model->out);
             string modelName = getModelName(other);
             if (other != NULL)
             {
-                Event e = new Event(other, event->time, "external", modelName, "");
+                Event e = new Event(other, event.time, "external", modelName, "");
                 events.push_back(e);
             }
             //create an internal transition for ourselves if needed
-            Time *  modelAdvance = event->model->timeAdvance();
-            if (modelAdvance->realTime != event->model->getMaxTimeAdvance())
+            Time *  modelAdvance = event.model->timeAdvance();
+            if (modelAdvance->realTime != event.model->getMaxTimeAdvance())
             {
                 Time eventTime(event.time.realTime + modelAdvance.realTime, 0);
                 Event ourOwnNextEvent = new Event(event.model, eventTime, "internal", event.modelName, "");
@@ -152,14 +152,14 @@ public:
             }
             delete modelAdvance;
         }
-        else if (event->action.compare("external") == 0)
+        else if (event.action.compare("external") == 0)
         {
             //remove the old internal event.. It may no longer be correct
-            events = removeInternalEvent(event->model);
+            events = removeInternalEvent(event.model);
 
             //Create a new internal event. It may or may not create the same event that was just deleted
-            Time modelAdvance = event->model->timeAdvance();
-            Time eventTime = new Time(event->time.realTime + modelAdvance->realTime, 0);
+            Time modelAdvance = event.model->timeAdvance();
+            Time eventTime = new Time(event.time.realTime + modelAdvance->realTime, 0);
             Event e = new Event(event.model, eventTime, "internal", event.modelName, "");
             events.push_back(e);
         }
@@ -195,40 +195,40 @@ public:
                     {
                         if ((current.action.compare("internal") == 0 && eventAfter->action.compare("external") == 0) || (current->action.compare("external") == 0 && eventAfter->action.compare("internal") == 0))
                         {
-                            events.remove(); //this will remove the eventAfter
+                            events->remove(); //this will remove the eventAfter
 
                             string input = current->input.compare("") == 0 ? eventAfter->input : current->input;
                             Event con = new Event(current.model, current.time, "confluent", current.modelName, input);
-                            updatedEvents.insert(con);
+                            updatedEvents->insert(con);
                         }
                     }
                     else
                     {
-                        updatedEvents.insert(current);
+                        updatedEvents->insert(current);
                     }
                 }
                 else
                 {
-                    updatedEvents.insert(current);
+                    updatedEvents->insert(current);
                 }
             }
 
             //make progress on the loop... Look at each object
-            current = events.remove();
-            eventAfter = events.peek();
+            current = events->remove();
+            eventAfter = events->peek();
         }
 
         return updatedEvents;
     }
 
-    EventQueue * removeInternalEvent(Model * m)
+    EventQueue * removeInternalEvent(Model<IN, OUT> * m)
     {
-        EventQueue * validEvents = new EventQueue(this.events.pQueue.length);
-        Event * e = this.events.remove();
+        EventQueue * validEvents = new EventQueue(events->getNumberOfElements);
+        Event * e = events->remove();
 
         while (e != NULL)
         {
-            if (!(e.model == m && e->action.compare("internal") == 0))
+            if (!(e->model == m && e->action.compare("internal") == 0))
             {
                 validEvents->insert(e);
             }
@@ -239,7 +239,7 @@ public:
 
     string toString()
     {
-        return "Network -- events:" + this.events.getNumberOfElements();
+        return "Network -- events:" + to_string(events.getNumberOfElements());
     }
 };
 

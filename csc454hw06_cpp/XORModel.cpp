@@ -1,41 +1,44 @@
-public class XORModel extends Model<Integer, Integer> {
+#ifndef XOR
+#define XOR
 
-    final static int TIME_TO_PROCESS_PIECE = 1;
-    double timeRemaining;
+#include "Model.cpp"
+#include "Time.cpp"
+#include "Port.cpp"
 
-    int[] state;
+using namespace std;
+class XORModel : public Model<int, int> {
 
-    public XORModel(Port<Integer>[] in, Port<Integer> out) {
-        this.state = new int[1];
-        this.numberOfInputs = 2;
-        this.in = new Port[numberOfInputs];
-        for (int i = 0; i < numberOfInputs; i++) {
-            this.in[i] = in[i];
-        }
-        this.out = out;
+public :
+
+    int* state;
+
+    XORModel(Port<int>* inp, Port<int> * outp) {
+        state = new int[1];
+        numberOfInputs = 2;
+        in = new Port<int>*[numberOfInputs];
+        in[0] = inp;
+        out = outp;
         lastKnownTime = new Time(0, 0);
     }
 
 
-    @Override
-    public String lambda() {
-        this.out.currentValue = state[0];
-        return this.out.currentValue.toString();
+    string lambda() {
+        out->currentValue = state[0];
+        return to_string(out->currentValue);
     }
 
-    @Override
-    public void externalTransition(Time elapsedTime, String in) {
+    void externalTransition(Time * elapsedTime, string inp) {
 
-        boolean inputsAreReady = true;
-        boolean haveInput = !in.equals("");
+        bool inputsAreReady = true;
+        bool haveInput = !(inp.compare("") == 0);
 
 
         if (haveInput) {
             //actually put the input somewhere
             for (int i =0; i<numberOfInputs; i++) {
-                if (this.in[i].currentValue == null) {
+                if (in[i]->currentValue == NULL) {
                     //give a port the value
-                    this.in[i].currentValue = Integer.parseInt(in);
+                    in[i]->currentValue = stoi(inp);
                     break;
                 }
             }
@@ -43,7 +46,7 @@ public class XORModel extends Model<Integer, Integer> {
 
 
         for (int i = 0; i < numberOfInputs; i++) {
-            if (this.in[i].currentValue == null) {
+            if (in[i]->currentValue == NULL) {
                 //someone set the value
                 inputsAreReady = false;
                 break;
@@ -51,11 +54,11 @@ public class XORModel extends Model<Integer, Integer> {
         }
 
         if (inputsAreReady) {
-            this.state[0] = this.in[0].currentValue ^ this.in[1].currentValue;
+            state[0] = in[0]->currentValue ^ in[1]->currentValue;
 
             //reset inputs
             for (int i = 0; i < numberOfInputs; i++) {
-                this.in[i].currentValue = null;
+                in[i]->currentValue = NULL;
             }
 
         } else {
@@ -65,30 +68,28 @@ public class XORModel extends Model<Integer, Integer> {
 
     }
 
-    @Override
-    public void internalTransition() {
-        this.out.currentValue = null;
+    void internalTransition() {
+        out->currentValue = NULL;
     }
 
-    @Override
-    public void confluentTransition(Time currentTime, String in) {
+    void confluentTransition(Time * currentTime, string in) {
         internalTransition();
-        lastKnownTime = currentTime; //this is to prevent the press from thinking it is already done another part, since internal transition reset time
+        lastKnownTime->realTime = currentTime->realTime;
+        lastKnownTime->discreteTime = currentTime->discreteTime;//this is to prevent the press from thinking it is already done another part, since internal transition reset time
         externalTransition(currentTime, in);
     }
 
-    @Override
-    public Time timeAdvance() {
+    Time * timeAdvance() {
         return new Time(1, 0);
     }
 
-    @Override
-    public double getMaxTimeAdvance() {
-        return Double.MAX_VALUE;
+     double getMaxTimeAdvance() {
+        return DBL_MAX;;
     }
 
-    @Override
-    public String toString() {
-        return "XOR Model - state : " + state[0];
+    string toString() {
+        return "XOR Model - state : " + to_string(state[0]);
     }
-}
+};
+
+#endif

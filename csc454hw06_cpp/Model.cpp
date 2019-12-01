@@ -21,11 +21,11 @@ public:
 
     std::string lambda() {}
 
-    void externalTransition(Time elapsedTime, std::string in) {}
+    void externalTransition(Time * elapsedTime, std::string in) {}
 
     void internalTransition() {}
 
-    void confluentTransition(Time elapsedTime, std::string in) {}
+    void confluentTransition(Time * elapsedTime, std::string in) {}
 
     Time *timeAdvance() {}
 

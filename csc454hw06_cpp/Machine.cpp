@@ -42,7 +42,8 @@ public:
             timeRemainingOnPiece = TIME_TO_PROCESS_PIECE;
         }
 
-        lastKnownTime = currentTime;
+        lastKnownTime->realTime = currentTime->realTime;
+        lastKnownTime->discreteTime = currentTime->discreteTime;
 
         int partsAdded = in[0]->currentValue;
         in[0]->currentValue = 0;
@@ -59,7 +60,8 @@ public:
 
     void confluentTransition(Time * currentTime, string in) {
         internalTransition();
-        lastKnownTime = currentTime; //this is to prevent the drill from thinking it is already done another part, since internal transition reset time
+        lastKnownTime->realTime = currentTime->realTime;
+        lastKnownTime->discreteTime = currentTime->discreteTime;
         externalTransition(currentTime, in);
     }
 

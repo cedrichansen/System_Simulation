@@ -1,63 +1,63 @@
-public class MemoryModel extends Model <Integer, Integer> {
+#ifndef MM
+#define MM
 
-    final static int TIME_TO_PROCESS_PIECE = 1;
-    double timeRemaining;
 
-    int [] state;
+#include "Model.cpp"
+#include "Time.cpp"
+#include "Port.cpp"
 
-    public MemoryModel(Port<Integer>[] in, Port<Integer> out){
-        this.state = new int [2];
-        this.numberOfInputs = 1;
-        this.in = new Port[numberOfInputs];
-        for (int i =0; i<numberOfInputs; i++) {
-            this.in[i] = in[i];
-        }
-        this.out = out;
+using namespace std;
+
+class MemoryModel : public Model <int, int> {
+
+public :
+
+    int * state;
+
+    MemoryModel(Port<int>* inp, Port<int> *  outp){
+        state = new int [2];
+        numberOfInputs = 1;
+        in = new Port<int>*[numberOfInputs];
+        in[0] = inp;
+        out = outp;
         lastKnownTime = new Time(0,0);
     }
-
-    @Override
-    public String lambda() {
-        this.out.currentValue = state[0];
-        return this.out.currentValue.toString();
+    string lambda() {
+        out->currentValue = state[0];
+        return to_string(out->currentValue);
     }
 
-    @Override
-    public void externalTransition(Time elapsedTime, String in) {
-        Integer inp = this.in[0].currentValue;
-        this.in[0].currentValue = null;
-        inp = inp == null ? Integer.parseInt(in) : inp; //if network input, input will come from in param rather than pipe
-
-        int x1 = this.state[1];
-        int x2 = inp;
-        int [] stateVals = {x1, x2};
-        this.state = stateVals;
+     void externalTransition(Time * elapsedTime, string inp) {
+        int input = in[0]->currentValue;
+        in[0]->currentValue = NULL;
+        input = (input == NULL) ? stoi(inp) : input; //if network input, input will come from in param rather than pipe
+        state[0] = state[1];
+        state[1] = input;
     }
 
-    @Override
-    public void internalTransition() {
-        this.out.currentValue = null;
+    void internalTransition() {
+        out->currentValue = NULL;
     }
 
-    @Override
-    public void confluentTransition(Time currentTime, String in) {
+    void confluentTransition(Time * currentTime, string in) {
         internalTransition();
-        lastKnownTime = currentTime; //this is to prevent the press from thinking it is already done another part, since internal transition reset time
+        lastKnownTime->realTime = currentTime->realTime;
+        lastKnownTime->discreteTime = currentTime->discreteTime; //this is to prevent the press from thinking it is already done another part, since internal transition reset time
         externalTransition(currentTime, in);
     }
 
-    @Override
-    public Time timeAdvance() {
+    Time * timeAdvance() {
         return new Time(1, 0);
     }
 
-    @Override
-    public double getMaxTimeAdvance() {
-        return Double.MAX_VALUE;
+   double getMaxTimeAdvance() {
+        return DBL_MAX;
     }
 
-    @Override
-    public String toString() {
-        return "Memory Model - state : " + state[0] + ", " + state[1];
+    string toString() {
+        return "Memory Model - state : " + to_string(state[0]) + ", " + to_string(state[1]);
     }
-}
+};
+
+
+#endif
