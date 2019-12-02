@@ -1,6 +1,13 @@
 import java.util.LinkedList;
 import java.util.Queue;
 
+
+/**
+ *
+ * The purpose of this class is to convert the raw input into the network, of form "4-2-1" where 4 represents the amount of tires,
+ * 2 represents the amount of batteries, and 1 is amount of engines, convert this into an order, and send it off to the
+ * manufacturers who will create the appropriate amount of pieces
+ */
 public class OrderProcessor extends  Model<String, Order> {
 
     final static int TIME_TO_PROCESS_ORDER = 1;

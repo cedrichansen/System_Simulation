@@ -20,6 +20,15 @@ public class Network<IN, OUT> {
         events = new EventQueue(100);
     }
 
+    public Network(Port<IN> input, Port<OUT> out) {
+        this.in = new Port[1];
+        this.in[0] = input;
+        this.out = out;
+        children = new HashMap<>();
+        prevKnownTime = new Time(0, 0);
+        events = new EventQueue(100);
+    }
+
     void addChild(Model m, String name) {
         children.put(name, m);
         m.addParent(this);

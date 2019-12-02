@@ -10,7 +10,6 @@ public class Main {
         Port<Order> opOut = new Port<Order>(null);
         OrderProcessor op = new OrderProcessor(opIn, opOut);
 
-
         Port<Order> tireIn = new Port<Order>(null);
         Port<Tire> tireOut = new Port<Tire>(null);
         Manufacturer<Tire> tireMaker = new Manufacturer<Tire>(tireIn, tireOut, 1, "Tire manufacturer");
@@ -31,10 +30,39 @@ public class Main {
         Assembler carAssembler = new Assembler(assemblerIns, assemblerOut);
 
         Port<Car> dealerIn = new Port<Car>(null);
-        Dealership dealership = new Dealership(dealerIn);
+        Port<Car> dealerOut = new Port<Car> (null);
+        Dealership dealership = new Dealership(dealerIn, dealerOut);
 
+        Pipe<Order> orderToTire = new Pipe<Order>(opOut, tireIn);
+        Pipe<Order> orderToEngine = new Pipe<Order>(opOut, engineIn);
+        Pipe<Order> orderToBattery = new Pipe<Order>(opOut, batteryIn);
 
+        Pipe<Battery> battToAssembler = new Pipe<Battery>(batteryOut, assemblerBatt);
+        Pipe<Engine> engineToAssembler = new Pipe<Engine>(engineOut, assemglerEng);
+        Pipe<Tire> tireToAssembler = new Pipe<Tire>(tireOut, assemblerTire);
 
+        Pipe<Car> assemblerToDealer  = new Pipe<Car>(assemblerOut, dealerIn);
+
+        Network<String, Car> carPipeline = new Network<String, Car>(opIn, dealerOut);
+
+        carPipeline.addChild(op, "orderProcessor");
+        carPipeline.addChild(tireMaker, "tire maker");
+        carPipeline.addChild(engineMaker, "engine maker");
+        carPipeline.addChild(batteryMaker, "battery maker");
+        carPipeline.addChild(carAssembler, "assembler");
+        carPipeline.addChild(dealership, "dealership");
+
+        carPipeline.addPipe(orderToTire);
+        carPipeline.addPipe(orderToBattery);
+        carPipeline.addPipe(orderToEngine);
+
+        carPipeline.addPipe(battToAssembler);
+        carPipeline.addPipe(engineToAssembler);
+        carPipeline.addPipe(tireToAssembler);
+
+        carPipeline.addPipe(assemblerToDealer);
+
+        (new Framework(carPipeline, getInputTrajectory("carAssembly.txt"))).start();
 
     }
 

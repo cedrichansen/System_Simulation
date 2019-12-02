@@ -1,15 +1,16 @@
-public class Dealership extends Model<Car, Integer> {
+public class Dealership extends Model<Car, Car> {
 
     static final int TIME_TO_SELL_CAR = 10;
     double timeRemainingOnCurrentSale;
 
     int numberOfCarsToSell;
 
-    public Dealership(Port<Car> in) {
+    public Dealership(Port<Car> in, Port<Car> out) {
         numberOfCarsToSell = 0;
         this.numberOfInputs = 1;
         this.in = new Port[numberOfInputs];
         this.in[0] = in;
+        this.out = out;
         lastKnownTime = new Time(0,0);
     }
 
