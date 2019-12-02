@@ -1,7 +1,7 @@
 public class Car {
 
-    static int numEngines = 1;
-    static int numBatteries = 2;
-    static int numWheels = 4;
+    static int numEnginesRequired = 1;
+    static int numBatteriesRequired = 2;
+    static int numWheelsRequired = 4;
 
 }

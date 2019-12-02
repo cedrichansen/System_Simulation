@@ -12,20 +12,20 @@ public class Main {
 
         Port<Order> tireIn = new Port<>(null);
         Port<Tire> tireOut = new Port<>(null);
-        Manufacturer<Tire> tireMaker = new Manufacturer<>(tireIn, tireOut, 1, "Tire manufacturer");
+        TireManufacturer tireMaker = new TireManufacturer(tireIn, tireOut);
 
         Port<Order> engineIn = new Port<>(null);
         Port<Engine> engineOut = new Port<>(null);
-        Manufacturer<Engine> engineMaker = new Manufacturer<>(engineIn, engineOut, 4, "Engine manufacturer");
+        EngineManufacturer engineMaker = new EngineManufacturer(engineIn, engineOut);
 
         Port<Order> batteryIn = new Port<>(null);
         Port<Battery> batteryOut = new Port<>(null);
-        Manufacturer<Battery> batteryMaker = new Manufacturer<>(batteryIn, batteryOut, 2, "Battery manufacturer");
+        BatteryManufacturer batteryMaker = new BatteryManufacturer(batteryIn, batteryOut);
 
         Port<Battery> assemblerBatt = new Port<>(null);
-        Port<Engine> assemlerEng = new Port<>(null);
+        Port<Engine> assemblerEng = new Port<>(null);
         Port<Tire> assemblerTire = new Port<>(null);
-        Port [] assemblerIns = {assemblerBatt, assemlerEng, assemblerTire};
+        Port [] assemblerIns = {assemblerBatt, assemblerEng, assemblerTire};
         Port <Car> assemblerOut = new Port<>(null);
         Assembler carAssembler = new Assembler(assemblerIns, assemblerOut);
 
@@ -38,7 +38,7 @@ public class Main {
         Pipe<Order> orderToEngine = new Pipe<>(opOut, engineIn);
 
         Pipe<Battery> battToAssembler = new Pipe<>(batteryOut, assemblerBatt);
-        Pipe<Engine> engineToAssembler = new Pipe<>(engineOut, assemlerEng);
+        Pipe<Engine> engineToAssembler = new Pipe<>(engineOut, assemblerEng);
         Pipe<Tire> tireToAssembler = new Pipe<>(tireOut, assemblerTire);
 
         Pipe<Car> assemblerToDealer  = new Pipe<>(assemblerOut, dealerIn);

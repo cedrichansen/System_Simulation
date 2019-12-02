@@ -7,6 +7,6 @@ public class Battery extends CarPart{
 
     @Override
     public String toString() {
-        return "Battery";
+        return name;
     }
 }
