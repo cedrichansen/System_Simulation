@@ -24,15 +24,15 @@ public:
     EventQueue<IN, OUT> *events;
     map<string, modelPtr> *children;
     map<string, pipePtr> *pipes;
-    Port<IN> *in;
+    Port<IN> **in;
     Port<OUT> *out;
     int numInputs;
     typename map<string, pipePtr>::iterator pipeItr;
     typename map<string, modelPtr>::iterator modelItr;
 
-    Network(Port<IN> *inputs, Port<OUT> *outp, int numInputs)
+    Network(Port<IN> ** inputs, Port<OUT> *outp, int numIn)
     {
-        numInputs = numInputs;
+        numInputs = numIn;
         in = inputs;
         out = outp;
         pipes = new map<string, pipePtr>();
@@ -54,7 +54,7 @@ public:
     {
         for (pipeItr = pipes->begin(); pipeItr != pipes->end(); pipeItr++)
         {
-            if (pipeItr->second->currentValue != NULL)
+            if (pipeItr->second->sending->currentValue != NULL)
             {
                 pipeItr->second->passValue();
             }
@@ -81,27 +81,27 @@ public:
     Model<IN, OUT> *findConnectedModel(int i)
     {
 
-        Port<IN> initial = in[i];
+        Port<IN> *initial = in[i];
 
-        for (modelItr = children->begin; modelItr != children->end(); modelItr++)
+        for (modelItr = children->begin(); modelItr != children->end(); modelItr++)
         {
-            for (int i = 0; i < modelItr->second->numInputs; i++)
+            for (int i = 0; i < modelItr->second->numberOfInputs; i++)
             {
-                if (modelItr->second->numInputs[i] == initial)
+                if (modelItr->second->in[i] == initial)
                 {
                     return modelItr->second;
                 }
             }
         }
 
-        printf("Cannot find connected model");
+        printf("Cannot find connected model\n");
         return NULL;
     }
 
     Model<IN, OUT> *findModelToCreateEventFor(Port<IN> *o)
     {
 
-        Port<IN> inPort = NULL;
+        Port<IN> * inPort = NULL;
 
         for (pipeItr = pipes->begin(); pipeItr != pipes->end(); pipeItr++)
         {
@@ -116,7 +116,7 @@ public:
         {
             for (modelItr = children->begin(); modelItr != children->end(); modelItr++)
             {
-                for (int i = 0; i < modelItr->second->numInputs; i++)
+                for (int i = 0; i < modelItr->second->numberOfInputs; i++)
                 {
                     if (modelItr->second->in[i] == inPort)
                     {
@@ -128,39 +128,39 @@ public:
         return NULL;
     }
 
-    vector<Event<IN, OUT>*> generateEvents(Event<IN, OUT> event)
+    vector<Event<IN, OUT>*> generateEvents(Event<IN, OUT> * event)
     {
         vector<Event<IN, OUT> *> generatedEvents;
 
-        if (event.action.compare("internal") == 0 || event.action.compare("confluent") == 0)
+        if (event->action.compare("internal") == 0 || event->action.compare("confluent") == 0)
         {
             //we will create an external event for whatever is connected to its pipe
-            Model<IN, OUT> *other = findModelToCreateEventFor(event.model->out);
+            Model<IN, OUT> *other = findModelToCreateEventFor(event->model->out);
             string modelName = getModelName(other);
             if (other != NULL)
             {
-                Event<IN, OUT> *e = new Event<IN, OUT>(other, event.time, "external", modelName, "");
-                generatedEvents->push_back(e);
+                Event<IN, OUT> *e = new Event<IN, OUT>(other, event->time, "external", modelName, "");
+                generatedEvents.push_back(e);
             }
             //create an internal transition for ourselves if needed
-            Time *modelAdvance = event.model->timeAdvance();
-            if (modelAdvance->realTime != event.model->getMaxTimeAdvance())
+            Time *modelAdvance = event->model->timeAdvance();
+            if (modelAdvance->realTime != event->model->getMaxTimeAdvance())
             {
-                Time *eventTime = new Time(event.time->realTime + modelAdvance->realTime, 0);
-                Event<IN, OUT> *ourOwnNextEvent = new Event<IN, OUT>(event.model, eventTime, "internal", event.modelName, "");
+                Time *eventTime = new Time(event->time->realTime + modelAdvance->realTime, 0);
+                Event<IN, OUT> *ourOwnNextEvent = new Event<IN, OUT>(event->model, eventTime, "internal", event->modelName, "");
                 generatedEvents.push_back(ourOwnNextEvent);
             }
             delete modelAdvance;
         }
-        else if (event.action.compare("external") == 0)
+        else if (event->action.compare("external") == 0)
         {
             //remove the old internal event.. It may no longer be correct
-            events = removeInternalEvent(event.model);
+            events = removeInternalEvent(event->model);
 
             //Create a new internal event. It may or may not create the same event that was just deleted
-            Time *modelAdvance = event.model->timeAdvance();
-            Time *eventTime = new Time(event.time->realTime + modelAdvance->realTime, 0);
-            Event<IN, OUT> *e = new Event<IN, OUT>(event.model, eventTime, "internal", event.modelName, "");
+            Time *modelAdvance = event->model->timeAdvance();
+            Time *eventTime = new Time(event->time->realTime + modelAdvance->realTime, 0);
+            Event<IN, OUT> *e = new Event<IN, OUT>(event->model, eventTime, "internal", event->modelName, "");
             generatedEvents.push_back(e);
         }
 
@@ -175,14 +175,14 @@ public:
 
         EventQueue<IN, OUT> *updatedEvents = new EventQueue<IN, OUT>(events->getNumberOfElements());
 
-        Time * t = events->peek().time;
+        Time * t = events->peek()->time;
         Event<IN, OUT> * current = events->remove();
         Event<IN, OUT> * eventAfter = events->peek();
 
-        while (current->action.compare("nothing") != 0)
+        while (current != NULL)
         {
 
-            if (eventAfter->action.compare("nothing") != 0)
+            if (eventAfter  != NULL)
             {
                 //the current event is the last event, so it can't be confluent. add it
                 updatedEvents->insert(current);

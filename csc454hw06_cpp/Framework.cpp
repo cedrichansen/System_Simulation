@@ -6,14 +6,14 @@
 #include "Network.cpp"
 #include <iterator>
 #include "Trajectory.cpp"
-
+#include <stdio.h>
 
 using namespace std;
 template <class IN, class OUT>
 class Framework {
 public:
     Network<IN, OUT> *network;
-    vector <Trajectory* > trajectory;
+    vector <Trajectory*> trajectory;
 
     Time *currentTime;
     int maxNumberOfEvents;
@@ -23,7 +23,8 @@ public:
     int outputsPrinted = 0;
 
     using eventPtr = Event<IN, OUT> *;
-    typename map<string, eventPtr>::iterator eventItr;
+    typename vector<eventPtr>::iterator eventItr;
+    typename vector<Trajectory*>::iterator trajItr;
 
 
     Framework(Network<IN, OUT> * n, vector <Trajectory*> traj) {
@@ -48,28 +49,28 @@ public:
     void start() {
 
         /** add all of the events which are read from the input trajectory*/
-        for (eventItr = trajectory.begin(); eventItr < trajectory.end(); eventItr++) {
-            for (int i = 0; i < eventItr->numberOfInputs; i++) {
+        for (trajItr = trajectory.begin(); trajItr < trajectory.end(); trajItr++) {
+            for (int i = 0; i < network->numInputs; i++) {
                 //tell each of the input ports/models about what it will be receiving
                 Model<IN, OUT> * startingPoint = network->findConnectedModel(i);
                 string startingModelName = network->getModelName(startingPoint);
                 for (int j = 0; j < numLoops; j++) {
                     network->events->insert(
-                            new Event<IN, OUT>(startingPoint, new Time(eventItr->time, 0), "external", startingModelName, eventItr->inputs[i]));
+                            new Event<IN, OUT>(startingPoint, new Time(trajItr->time, 0), "external", startingModelName, trajItr->inputs[i]));
                 }
             }
         }
 
         int eventsExecuted = 0;
-        Event<IN, OUT> nextEvent = network->events->remove();
+        Event<IN, OUT> * nextEvent = network->events->remove();
 
-        while (nextEvent.input.compare("-1") != 0 && eventsExecuted < maxNumberOfEvents && outputsPrinted < maxOutputs) {
+        while (nextEvent->input.compare("-1") != 0 && eventsExecuted < maxNumberOfEvents && outputsPrinted < maxOutputs) {
 
-            currentTime = nextEvent.time; //advance time
+            currentTime = nextEvent->time; //advance time
             executeEvent(nextEvent, currentTime); //execute event
 
-            vector <Event<IN, OUT>*> generatedEvents = network->generateEvents(nextEvent);
-            for (eventItr = generatedEvents->start(); eventItr< generatedEvents->end(); eventItr++) {
+            vector <eventPtr> generatedEvents = network->generateEvents(nextEvent);
+            for (eventItr = generatedEvents.start(); eventItr< generatedEvents.end(); eventItr++) {
                 network->events->insert(eventItr->second());
             }
 
@@ -77,7 +78,7 @@ public:
                 network->events = network->createConfluentEvent();
                 nextEvent = network->events->remove();
             } else {
-                nextEvent = Event<IN, OUT>(NULL, NULL, "nothing", "-1" , "-1");
+                nextEvent = NULL;
             }
 
             eventsExecuted++;
@@ -87,48 +88,48 @@ public:
         printf("\n\nSimulation complete");
     }
 
-    void executeEvent(Event<IN, OUT> e, Time * currentTime) {
+    void executeEvent(Event<IN, OUT> * e, Time * currentTime) {
 
-        if (e.action.compare("internal") == 0 ) {
+        if (e->action.compare("internal") == 0 ) {
 
-            string res = e.model.lambda();
-            printf(e.time->toString() + " " + e.modelName + ": " + res + "\n");
+            string res = e->model->lambda();
+            printf(e->time->toString() + " " + e->modelName + ": " + res + "\n");
 
-            if (e.model.out == network->out) {
+            if (e->model->out == network->out) {
                 if (numLoops != 1) {
                     if (networkEventsExecuted % numLoops == 0) {
-                        printf("           " + e.time->toString() + " Network: " + res + "\n");
+                        printf("           " + e->time->toString() + " Network: " + res + "\n");
                         outputsPrinted++;
                     }
                 } else {
-                    printf("           " + e.time->toString() + " Network: " + res + "\n");
+                    printf("           " + e->time->toString() + " Network: " + res + "\n");
                 }
                 networkEventsExecuted++;
             }
 
             network->passPipeValues(); //pass values around
-            e.model->internalTransition();
+            e->model->internalTransition();
 
-        } else if (e.action.compare("external") == 0) {
+        } else if (e->action.compare("external") == 0) {
 
-            e.model->externalTransition(currentTime, e.input);
+            e->model->externalTransition(currentTime, e->input);
 
-        } else if (e.action.compare("confluent") == 0) {
-            string res = e.model.lambda();
-            printf(e.time->toString() + " " + e.modelName + ": " + res + "\n");
-            if (e.model->out == network->out) {
+        } else if (e->action.compare("confluent") == 0) {
+            string res = e->model.lambda();
+            printf(e->time->toString() + " " + e->modelName + ": " + res + "\n");
+            if (e->model->out == network->out) {
                 if (numLoops != 1) {
                     if (networkEventsExecuted % numLoops == 0) {
-                        printf("           " + e.time->toString() + " Network: " + res + "\n");
+                        printf("           " + e->time->toString() + " Network: " + res + "\n");
                         outputsPrinted++;
                     }
                 } else {
-                    printf("           " + e.time->toString() + " Network: " + res + "\n");
+                    printf("           " + e->time->toString() + " Network: " + res + "\n");
                 }
                 networkEventsExecuted++;
             }
             network->passPipeValues(); //pass values around
-            e.model->confluentTransition(currentTime, e.input);
+            e->model->confluentTransition(currentTime, e->input);
         }
 
     }

@@ -11,7 +11,8 @@ int  main () {
         /****** FOR HW05 ***/
         Port<int> * pressInPort = new Port<int>(0);
 
-        Port<int> * netIn = {pressInPort};
+        Port<int> ** netIn = new Port<int>*[1];
+        netIn[0] = pressInPort;
 
         Port<int> * pressOutPort = new Port<int>(0);
         Port <int> * drillInPort = new Port<int>(0);

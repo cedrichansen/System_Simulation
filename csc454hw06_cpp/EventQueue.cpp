@@ -40,7 +40,7 @@ public:
         }
         int minIndex = 0;
         for (int i=1; i<index; i++) {
-            if (pQueue[i]->compareTo(pQueue[minIndex]) < 0) {
+            if (pQueue[i]->compareTo((*pQueue[minIndex])) < 0) {
                 minIndex = i;
             }
         }
