@@ -29,7 +29,8 @@ public class OrderProcessor extends  Model<String, Order> {
     @Override
     public String lambda() {
         this.out.currentValue = orders.remove();
-        return "Order finished processing!";
+        numberOfPartsToProcess--;
+        return "Order finished processing! Will be making " + this.out.currentValue.toString();
     }
 
     @Override
@@ -48,13 +49,11 @@ public class OrderProcessor extends  Model<String, Order> {
         String [] ins = in.split("-");
         Order o = new Order(Integer.parseInt(ins[0]), Integer.parseInt(ins[1]), Integer.parseInt(ins[2]));
         orders.add(o);
-        numberOfPartsToProcess++;
         lastKnownTime = currentTime;
     }
 
     @Override
     public void internalTransition() {
-        this.numberOfPartsToProcess--;
         this.lastKnownTime = new Time(this.lastKnownTime.realTime + timeRemainingOnOrder, 0); // we might care to know the time at which processing time was reset
         this.timeRemainingOnOrder = TIME_TO_PROCESS_ORDER;
     }
@@ -68,7 +67,7 @@ public class OrderProcessor extends  Model<String, Order> {
 
     @Override
     public Time timeAdvance() {
-        if (numberOfPartsToProcess == 0) {
+        if (orders.size() == 0) {
             return new Time(Double.MAX_VALUE, 0);
         } else {
             return new Time(timeRemainingOnOrder, 0);

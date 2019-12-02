@@ -76,26 +76,28 @@ public class Network<IN, OUT> {
             return null;
     }
 
-    Model findModelToCreateEventFor(Port o) {
-        Port inPort = null;
+
+    ArrayList<Model> findModelsToCreateEventFor(Port o) {
+        ArrayList<Model> models = new ArrayList<>();
+        ArrayList<Port> validPorts = new ArrayList<>();
         for (Pipe p : pipes) {
-            Port s = p.sending;
-            if (s == o) {
-                inPort = p.receiving;
-                break;
+            if (p.sending == o) {
+                validPorts.add(p.receiving);
             }
         }
 
-        if (inPort != null) {
+        if (validPorts.size() != 0) {
             for (Entry<String, Model> model : children.entrySet()) {
                 for (Port p : model.getValue().in) {
-                    if (p == inPort) {
-                        return model.getValue();
+                    for (Port op : validPorts) {
+                        if (p == op) {
+                            models.add(model.getValue());
+                        }
                     }
                 }
             }
         }
-        return null;
+        return models;
     }
 
     ArrayList<Event> generateEvents(Event event) {
@@ -104,12 +106,15 @@ public class Network<IN, OUT> {
         if (event.action.equals("internal") || event.action.equals("confluent")) {
 
             //we will create an external event for whatever is connected to its pipe
-            Model other = findModelToCreateEventFor(event.model.out);
-            String modelName = getModelName(other);
-            if (other != null) {
-                Event e = new Event(other, event.time, "external", modelName, "");
-                events.add(e);
+            ArrayList<Model> otherModels = findModelsToCreateEventFor(event.model.out);
+            for (Model other : otherModels) {
+                String modelName = getModelName(other);
+                if (other != null) {
+                    Event e = new Event(other, event.time, "external", modelName, "");
+                    events.add(e);
+                }
             }
+
             //create an internal transition for ourselves if needed
             Time modelAdvance = event.model.timeAdvance();
             if (modelAdvance.realTime != event.model.getMaxTimeAdvance()) {
