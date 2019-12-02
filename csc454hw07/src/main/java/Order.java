@@ -12,7 +12,7 @@ public class Order {
 
 
     public String toString(){
-        return "Tires: " + this.numberOfTires + " Engines: " + this.numberOfEngines + " Batteries: " + this.numberOfBatteries;
+        return "Tires: " + this.numberOfTires + " Batteries: " + this.numberOfBatteries + " Engines: " + this.numberOfEngines ;
     }
 
 }
