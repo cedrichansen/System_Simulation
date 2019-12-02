@@ -47,7 +47,6 @@ public class Network<IN, OUT> {
     }
 
 
-
     String getModelName(Model m) {
         for (Entry<String, Model> model : children.entrySet()) {
             if (model.getValue() == m) {
@@ -60,20 +59,21 @@ public class Network<IN, OUT> {
 
     /**
      * We pass in what index of the input port we want, and we return the model that owns that port
+     *
      * @return the model connected to the port
      */
     Model findConnectedModel(int i) {
         Port initial = in[i];
 
-            for (Entry<String, Model> model : children.entrySet()) {
-                for (Port p : model.getValue().in) {
-                    if (p == initial) {
-                        return model.getValue();
-                    }
+        for (Entry<String, Model> model : children.entrySet()) {
+            for (Port p : model.getValue().in) {
+                if (p == initial) {
+                    return model.getValue();
                 }
             }
+        }
         System.out.println("Cannot find connected model!");
-            return null;
+        return null;
     }
 
 
@@ -128,9 +128,11 @@ public class Network<IN, OUT> {
 
             //Create a new internal event. It may or may not create the same event that was just deleted
             Time modelAdvance = event.model.timeAdvance();
-            Time eventTime = new Time(event.time.realTime + modelAdvance.realTime, 0);
-            Event e = new Event(event.model, eventTime, "internal", event.modelName, "");
-            events.add(e);
+            if (modelAdvance.realTime != event.model.getMaxTimeAdvance()) {
+                Time eventTime = new Time(event.time.realTime + modelAdvance.realTime, 0);
+                Event e = new Event(event.model, eventTime, "internal", event.modelName, "");
+                events.add(e);
+            }
         }
 
         return events;
@@ -181,7 +183,7 @@ public class Network<IN, OUT> {
             eventAfter = events.peek();
         }
 
-            return updatedEvents;
+        return updatedEvents;
 
     }
 
@@ -203,7 +205,6 @@ public class Network<IN, OUT> {
     public String toString() {
         return "Network -- events:" + this.events.getNumberOfElements();
     }
-
 
 
 }

@@ -1,6 +1,6 @@
 public class Dealership extends Model<Car, Car> {
 
-    static final int TIME_TO_SELL_CAR = 25;
+    static final int TIME_TO_SELL_CAR = 15;
     double timeRemainingOnCurrentSale;
 
     int numberOfCarsToSell;
@@ -19,7 +19,7 @@ public class Dealership extends Model<Car, Car> {
     public String lambda() {
         this.out.currentValue = new Car();
         numberOfCarsToSell--;
-        return "Dealership just sold a car!";
+        return "Dealership just sold a car! Now have " + numberOfCarsToSell + " car(s) left to sell";
     }
 
     @Override
@@ -38,6 +38,7 @@ public class Dealership extends Model<Car, Car> {
         }
 
         lastKnownTime = currentTime;
+
     }
 
     @Override
