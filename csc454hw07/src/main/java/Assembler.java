@@ -55,6 +55,8 @@ public class Assembler extends Model<CarPart, Car> {
             this.in[2].currentValue = null;
         }
 
+        this.lastKnownTime = currentTime;
+
     }
 
     @Override
