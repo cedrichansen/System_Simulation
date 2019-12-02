@@ -94,13 +94,12 @@ public class Framework {
                 networkEventsExecuted++;
             }
 
-            network.passPipeValues(); //pass values around
+            network.passPipeValues(e.model.out);
             e.model.internalTransition();
 
         } else if (e.action.equals("external")) {
 
             e.model.externalTransition(currentTime, e.input);
-            //network.passPipeValues(); //No need to pass values around.... Nothing was generated
 
         } else if (e.action.equals("confluent")) {
             String res = e.model.lambda();
@@ -116,7 +115,7 @@ public class Framework {
                 }
                 networkEventsExecuted++;
             }
-            network.passPipeValues(); //pass values around
+            network.passPipeValues(e.model.out);
             e.model.confluentTransition(currentTime, e.input);
         }
 

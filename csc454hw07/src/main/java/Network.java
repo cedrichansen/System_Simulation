@@ -38,9 +38,10 @@ public class Network<IN, OUT> {
         pipes.add(p);
     }
 
-    void passPipeValues() {
+    //Only send the value that was created by the previous models delta
+    void passPipeValues(Port out) {
         for (Pipe p : pipes) {
-            if (p.sending.currentValue != null) {
+            if (p.sending.currentValue != null && p.sending == out) {
                 p.passValue();
             }
         }
